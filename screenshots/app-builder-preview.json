@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Bitácora",
+      "hasCanvas": false,
+      "bodyTextLen": 7847,
+      "bodyTextHash": "c5dc44e8a67173a4cccb5c4f9789c3a0adc42e7ea11d1e10030b767a18b9f2d9",
+      "bodyTextPrefix": "Bitácora Investigación · Word vivo Tablero Bitácora Anexos Docum",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Bitácora",
+      "hasCanvas": false,
+      "bodyTextLen": 7581,
+      "bodyTextHash": "d1de46ea7853fc0e45b5841b3f20623b6990367b48f14a816a73f8df0b254fab",
+      "bodyTextPrefix": "EPM Descargar Word CUADERNO DE INVESTIGACIÓN Bitácora que alimen",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Bitácora ERA">
+  <rect width="32" height="32" rx="6" fill="#1F4F47"/>
+  <path fill="#F3EEE4" d="M6 10.5 15 8v16L6 21.5Z"/>
+  <path fill="#F3EEE4" d="M17 8l9 2.5v11L17 24Z"/>
+</svg>

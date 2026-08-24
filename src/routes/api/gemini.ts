@@ -1,0 +1,116 @@
+import { createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/api/gemini")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        try {
+          const body = (await request.json().catch(() => null)) as {
+            prompt?: string;
+            context?: string;
+            sectionTitle?: string;
+            model?: string;
+            apiKey?: string;
+          } | null;
+
+          const prompt = body?.prompt?.trim();
+          if (!prompt) {
+            return Response.json({ error: "Falta el prompt o consulta para Gemini." }, { status: 400 });
+          }
+
+          const apiKey =
+            body?.apiKey?.trim() ||
+            process.env.GEMINI_API_KEY ||
+            process.env.VITE_GEMINI_API_KEY ||
+            "";
+
+          if (!apiKey) {
+            return Response.json(
+              {
+                error:
+                  "No se encontró una clave de API de Gemini. Ingresa tu API Key en la barra de configuración de Gemini.",
+                requiresKey: true,
+              },
+              { status: 401 },
+            );
+          }
+
+          const selectedModel = body?.model?.trim() || "gemini-3.6-flash";
+
+          const systemPrompt = `Eres un Asistente Senior de Investigación Empresarial y Auditoría especializado en la Empresa de Acueducto y Alcantarillado de Bogotá E.S.P. (EAAB-ESP).
+Tu misión es asistir al equipo universitario en la investigación, redacción académica de alto nivel y análisis documental para su bitácora y reporte Word (.docx) bajo Norma APA 7ª edición.
+Reglas estrictas:
+1. Sé preciso, profesional, analítico y riguroso.
+2. No inventes cifras ni resoluciones. Cita siempre el contexto oficial de la EAAB (Ley 142 de 1994, Ley 1712 de 2014, Decreto 1076 de 2015, portal de Transparencia acueducto.com.co).
+3. Estructura las respuestas con párrafos claros, títulos y viñetas cuando sea pertinente.
+4. Si se te proporciona información o texto de un extracto de PDF, analiza y sintetiza las cifras y hallazgos clave.`;
+
+          const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+
+          let fullUserMessage = "";
+          if (body?.sectionTitle) {
+            fullUserMessage += `[Sección de trabajo: ${body.sectionTitle}]\n\n`;
+          }
+          if (body?.context) {
+            fullUserMessage += `[Contexto / Texto de evidencia analizado]:\n${body.context}\n\n`;
+          }
+          fullUserMessage += `[Instrucción / Pregunta]:\n${prompt}`;
+
+          contents.push({
+            role: "user",
+            parts: [{ text: fullUserMessage }],
+          });
+
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+
+          const res = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              systemInstruction: {
+                parts: [{ text: systemPrompt }],
+              },
+              contents,
+              generationConfig: {
+                temperature: 0.4,
+                maxOutputTokens: 2048,
+              },
+            }),
+            signal: AbortSignal.timeout(30000),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            const apiError = data?.error?.message || "Error al comunicarse con la API de Gemini.";
+            if (res.status === 400 || res.status === 403 || res.status === 401) {
+              return Response.json(
+                { error: `Error de Google Gemini (${res.status}): ${apiError}. Verifica tu API Key.` },
+                { status: res.status },
+              );
+            }
+            return Response.json({ error: apiError }, { status: res.status });
+          }
+
+          const candidate = data?.candidates?.[0];
+          const text = candidate?.content?.parts?.map((p: { text: string }) => p.text).join("\n") || "";
+
+          if (!text) {
+            return Response.json({ error: "Gemini no devolvió ninguna respuesta de texto." }, { status: 500 });
+          }
+
+          return Response.json({
+            text,
+            model: selectedModel,
+            finishReason: candidate?.finishReason || "STOP",
+          });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "Error interno al invocar Gemini";
+          return Response.json({ error: message }, { status: 500 });
+        }
+      },
+    },
+  },
+});

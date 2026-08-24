@@ -1,0 +1,38 @@
+{
+  "url": "http://127.0.0.1:8081/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Bitácora ERA",
+      "hasCanvas": false,
+      "bodyTextLen": 3707,
+      "bodyTextHash": "0fcabceca3241840a9aec6b0ea560f47e898e1178899ee234bea7b4be3a19e96",
+      "bodyTextPrefix": "Bitácora ERA Investigación empresarial · Word vivo Tablero Bitác",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Bitácora ERA",
+      "hasCanvas": false,
+      "bodyTextLen": 3469,
+      "bodyTextHash": "5e94b18323b271cd415c4dc779f5b98691dd05620363e8b69ebfc3cdc252a948",
+      "bodyTextPrefix": "EPM Descargar Word ERA T.I.C · Wilmer Ruiz Botero Bitácora que a",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-built.json",
+  "divergesFromBaseline": false,
+  "baselineReasons": []
+}
