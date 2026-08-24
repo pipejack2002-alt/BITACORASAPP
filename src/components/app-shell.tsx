@@ -30,6 +30,36 @@ const NAV = [
   { to: "/equipo", label: "Equipo", icon: Users },
 ];
 
+function BitacoraLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+  const sizeClasses = {
+    sm: "size-7 rounded-lg p-1.2",
+    md: "size-9 rounded-xl p-1.5",
+    lg: "size-11 rounded-2xl p-2",
+  }[size];
+
+  return (
+    <div
+      className={cn(
+        "relative flex shrink-0 items-center justify-center bg-gradient-to-br from-emerald-700 via-emerald-900 to-teal-950 text-amber-300 shadow-md border border-emerald-600/40 ring-1 ring-amber-400/20",
+        sizeClasses,
+      )}
+    >
+      <svg viewBox="0 0 24 24" fill="none" className="size-full drop-shadow-xs" stroke="currentColor">
+        <path
+          d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v17a1 1 0 0 1-1 1H6.5a2.5 2.5 0 0 1-2.5-2.5Z"
+          fill="#064e3b"
+          stroke="#f59e0b"
+          strokeWidth="1.75"
+          strokeLinejoin="round"
+        />
+        <path d="M7 6.5h8M7 10h8M7 13.5h5" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.9" />
+        <circle cx="15.5" cy="14.5" r="2.5" fill="#f59e0b" stroke="#fef08a" strokeWidth="1" />
+        <path d="M15.5 17l1.5 3.5-2-1-2 1 1-3.5" fill="#f59e0b" />
+      </svg>
+    </div>
+  );
+}
+
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const sections = useBitacora((s) => s.sections);
@@ -38,9 +68,17 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="px-1 pb-4">
-        <p className="font-display text-lg leading-tight text-ink">Bitácora</p>
-        <p className="mt-0.5 text-[12px] text-muted">Investigación · Word vivo</p>
+      <div className="flex items-center gap-3 px-1 pb-4">
+        <BitacoraLogo size="md" />
+        <div>
+          <p className="font-display text-lg font-bold leading-tight text-ink tracking-tight flex items-center gap-1.5">
+            <span>Bitácora</span>
+            <span className="rounded-full bg-emerald-700/15 px-1.5 py-0.2 text-[10px] font-bold tracking-wide text-emerald-800">
+              DOCS
+            </span>
+          </p>
+          <p className="mt-0.5 text-[11px] font-medium text-muted">Investigación · Word vivo</p>
+        </div>
       </div>
       <nav className="grid gap-0.5">
         {NAV.map((item) => {
@@ -159,10 +197,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               </SheetContent>
             </Sheet>
             <div className="flex min-w-0 items-center gap-2">
+              <BitacoraLogo size="sm" />
               <CompanySettingsDialog
                 triggerVariant="ghost"
                 triggerSize="sm"
-                triggerClassName="h-8 px-2 font-normal text-ink hover:bg-surface-2"
+                triggerClassName="h-8 px-2 font-medium text-ink hover:bg-surface-2"
                 triggerLabel={`${company.shortName}${company.nit ? ` · NIT ${company.nit}` : ""}`}
               />
             </div>
