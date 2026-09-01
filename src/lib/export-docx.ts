@@ -6,6 +6,7 @@ import {
   Header,
   HeadingLevel,
   Packer,
+  PageBreak,
   PageNumber,
   Paragraph,
   ShadingType,
@@ -228,71 +229,171 @@ function infoTable(rows: [string, string][]) {
 
 export async function buildDocx(state: BitacoraState): Promise<Blob> {
   const named = state.team.filter((m) => m.name.trim());
-  const teamLine =
+  const activeStudents =
     named.length > 0
-      ? named.map((m) => `${m.name} (${m.role})`).join("; ")
-      : state.team.map((m) => m.role).join("; ");
+      ? named
+      : [
+          { id: "s1", name: "BERNAL OSORIO ANDRES", role: "Auditor Líder" },
+          { id: "s2", name: "VIZCAINO ESCAMILLA MARIA", role: "Auditora" },
+          { id: "s3", name: "MERCADO EGUIS SHADIA", role: "Auditora" },
+        ];
 
-  const coverBits: Paragraph[] = [];
-  if (state.meta.institution.trim()) {
-    coverBits.push(
-      new Paragraph({
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 100, before: 100 },
-        children: [
-          new TextRun({
-            text: state.meta.institution.toUpperCase(),
-            font: "Calibri",
-            size: 24,
-            color: PRIMARY,
-            bold: true,
-          }),
-        ],
-      }),
-    );
-  }
-
-  coverBits.push(
+  const coverBits: Paragraph[] = [
+    // 1. Título General y Entidad Auditada
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 80, before: 160 },
+      spacing: { before: 300, after: 120 },
+      children: [
+        new TextRun({
+          text: `Bitácora ${state.company.legalName || state.company.shortName}`,
+          font: "Calibri",
+          size: 28,
+          bold: true,
+          color: PRIMARY,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 700 },
       children: [
         new TextRun({
           text: "BITÁCORA DE INVESTIGACIÓN Y AUDITORÍA DE SISTEMAS",
           font: "Calibri",
-          size: 32,
+          size: 22,
+          color: MUTED,
+        }),
+      ],
+    }),
+
+    // 2. Integrantes del Equipo (Estudiantes en mayúsculas)
+    ...activeStudents.map(
+      (s) =>
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 120 },
+          children: [
+            new TextRun({
+              text: s.name.toUpperCase(),
+              font: "Calibri",
+              size: 24,
+              bold: true,
+              color: INK,
+            }),
+          ],
+        }),
+    ),
+
+    // 3. Bloque del Docente
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 600, after: 80 },
+      children: [
+        new TextRun({
+          text: "DOCENTE",
+          font: "Calibri",
+          size: 22,
           bold: true,
+          color: PRIMARY,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 700 },
+      children: [
+        new TextRun({
+          text: (state.meta.professor || "RUIZ BOTERO WILMER").toUpperCase(),
+          font: "Calibri",
+          size: 24,
+          bold: true,
+          color: INK,
+        }),
+      ],
+    }),
+
+    // 4. Bloque Institucional Inferior
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [
+        new TextRun({
+          text: (state.meta.institution || "Corporación Universitaria Latinoamericana (CUL)").toUpperCase(),
+          font: "Calibri",
+          size: 24,
+          bold: true,
+          color: PRIMARY,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [
+        new TextRun({
+          text: "Contaduría Pública",
+          font: "Calibri",
+          size: 22,
           color: INK,
         }),
       ],
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 320 },
+      spacing: { after: 60 },
       children: [
         new TextRun({
-          text: state.company.legalName || state.company.shortName,
+          text: state.meta.city || "Barranquilla / Atlántico",
           font: "Calibri",
-          size: 24,
-          color: PRIMARY,
-          bold: true,
+          size: 22,
+          color: INK,
         }),
       ],
     }),
-  );
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [
+        new TextRun({
+          text: "Colombia",
+          font: "Calibri",
+          size: 22,
+          color: INK,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+      children: [
+        new TextRun({
+          text: `${new Date().getFullYear()}`,
+          font: "Calibri",
+          size: 22,
+          bold: true,
+          color: INK,
+        }),
+      ],
+    }),
+
+    // Salto de página formal para que la portada ocupe su propia hoja
+    new Paragraph({
+      children: [new PageBreak()],
+    }),
+  ];
 
   const idRows: [string, string][] = [
     ["Entidad Auditada", state.company.legalName || state.company.shortName],
-    ["NIT / Identificación", state.company.nit],
-    ["Domicilio Principal", state.company.headquarters],
+    ["Sigla / Nombre Comercial", state.company.shortName],
+    ["NIT / Identificación Tributaria", state.company.nit],
+    ["Domicilio Principal / Sede", state.company.headquarters],
     ["Naturaleza Jurídica", state.company.nature],
     ["Sector Económico", state.company.sector],
-    ["Equipo de Auditoría", teamLine],
-    ["Asignatura", state.meta.course],
-    ["Institución", state.meta.institution],
-    ["Docente Titular", state.meta.professor],
-    ["Grupo / Curso", state.meta.groupName],
-    ["Ciudad / Fecha", `${state.meta.city || "Colombia"} · ${new Date().toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" })}`],
+    ["Composición / Propietario", state.company.majorityShareholder],
+    ["Portal Web Oficial", state.company.website],
+    ["Asignatura", state.meta.course || "Auditoría de Sistemas"],
+    ["Alcance de la Auditoría", "Auditoría de Sistemas de Información, Procesos y Cumplimiento Normativo"],
+    ["Fecha de Evaluación", `${state.meta.city || "Barranquilla"} · ${new Date().toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" })}`],
   ].filter(([, v]) => v.trim().length > 0) as [string, string][];
 
   const children: (Paragraph | Table)[] = [

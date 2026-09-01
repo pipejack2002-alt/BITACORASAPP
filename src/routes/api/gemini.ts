@@ -11,6 +11,16 @@ export const Route = createFileRoute("/api/gemini")({
             sectionTitle?: string;
             model?: string;
             apiKey?: string;
+            company?: {
+              shortName?: string;
+              legalName?: string;
+              sector?: string;
+              nature?: string;
+              website?: string;
+              nit?: string;
+              headquarters?: string;
+            };
+            companyName?: string;
           } | null;
 
           const prompt = body?.prompt?.trim();
@@ -36,14 +46,20 @@ export const Route = createFileRoute("/api/gemini")({
           }
 
           const selectedModel = body?.model?.trim() || "gemini-3.6-flash";
+          const company = body?.company;
+          const compName =
+            company?.legalName || company?.shortName || body?.companyName || "la entidad auditada";
+          const compSector = company?.sector || "empresarial / institucional";
+          const compNature = company?.nature || "pública, privada o mixta";
 
-          const systemPrompt = `Eres un Asistente Senior de Investigación Empresarial y Auditoría especializado en la Empresa de Acueducto y Alcantarillado de Bogotá E.S.P. (EAAB-ESP).
-Tu misión es asistir al equipo universitario en la investigación, redacción académica de alto nivel y análisis documental para su bitácora y reporte Word (.docx) bajo Norma APA 7ª edición.
+          const systemPrompt = `Eres un Asistente Senior de Investigación Empresarial y Auditoría de Sistemas para estudiantes universitarios de Contaduría Pública e Ingeniería de Sistemas.
+Actualmente estás auditando a la empresa: "${compName}" (Sector: ${compSector}, Naturaleza: ${compNature}).
+Tu misión es asistir al equipo universitario en la investigación rigurosa, redacción académica de alto nivel, estructuración de hallazgos y análisis documental para su bitácora y reporte Word (.docx) bajo Norma APA 7ª edición.
 Reglas estrictas:
-1. Sé preciso, profesional, analítico y riguroso.
-2. No inventes cifras ni resoluciones. Cita siempre el contexto oficial de la EAAB (Ley 142 de 1994, Ley 1712 de 2014, Decreto 1076 de 2015, portal de Transparencia acueducto.com.co).
-3. Estructura las respuestas con párrafos claros, títulos y viñetas cuando sea pertinente.
-4. Si se te proporciona información o texto de un extracto de PDF, analiza y sintetiza las cifras y hallazgos clave.`;
+1. Sé preciso, profesional, analítico y académicamente riguroso.
+2. Fundamenta tus respuestas en el marco normativo colombiano e internacional aplicable (ej. Ley 43 de 1990 de auditoría, Ley 1712 de 2014 si aplica transparencia pública, Ley 1581 de 2012 de datos personales, Ley 222 de 1995 de sociedades, estándares ISO/IEC 27001, ISO 9001, COSO, COBIT y normas sectoriales).
+3. Estructura las respuestas con títulos ejecutivos, párrafos analíticos y viñetas claras cuando sea pertinente.
+4. Si se te proporciona texto de extractos de balances, manuales o PDFs, analiza y sintetiza las cifras, roles y hallazgos clave.`;
 
           const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [];
 

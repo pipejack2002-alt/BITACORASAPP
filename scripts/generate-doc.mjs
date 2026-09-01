@@ -7,6 +7,7 @@ import {
   Header,
   HeadingLevel,
   Packer,
+  PageBreak,
   PageNumber,
   Paragraph,
   ShadingType,
@@ -208,27 +209,42 @@ function infoTable(rows) {
 
 async function run() {
   const coverBits = [
+    // 1. Título General
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 100, before: 100 },
+      spacing: { before: 300, after: 120 },
       children: [
         new TextRun({
-          text: "CORPORACIÓN UNIVERSITARIA LATINOAMERICANA (CUL)",
+          text: "Bitácora Empresa de Acueducto y Alcantarillado de Bogotá E.S.P. (EAAB-ESP)",
           font: "Calibri",
-          size: 24,
-          color: PRIMARY,
+          size: 28,
           bold: true,
+          color: PRIMARY,
         }),
       ],
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 80, before: 160 },
+      spacing: { after: 700 },
       children: [
         new TextRun({
           text: "BITÁCORA DE INVESTIGACIÓN Y AUDITORÍA DE SISTEMAS",
           font: "Calibri",
-          size: 32,
+          size: 22,
+          color: MUTED,
+        }),
+      ],
+    }),
+
+    // 2. Estudiantes del Equipo en mayúsculas
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 120 },
+      children: [
+        new TextRun({
+          text: "BERNAL OSORIO ANDRES",
+          font: "Calibri",
+          size: 24,
           bold: true,
           color: INK,
         }),
@@ -236,31 +252,141 @@ async function run() {
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 320 },
+      spacing: { after: 120 },
       children: [
         new TextRun({
-          text: "Empresa de Acueducto y Alcantarillado de Bogotá E.S.P. (EAAB-ESP)",
+          text: "VIZCAINO ESCAMILLA MARIA",
           font: "Calibri",
           size: 24,
-          color: PRIMARY,
           bold: true,
+          color: INK,
         }),
       ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 120 },
+      children: [
+        new TextRun({
+          text: "MERCADO EGUIS SHADIA",
+          font: "Calibri",
+          size: 24,
+          bold: true,
+          color: INK,
+        }),
+      ],
+    }),
+
+    // 3. Docente
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 600, after: 80 },
+      children: [
+        new TextRun({
+          text: "DOCENTE",
+          font: "Calibri",
+          size: 22,
+          bold: true,
+          color: PRIMARY,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 700 },
+      children: [
+        new TextRun({
+          text: "RUIZ BOTERO WILMER",
+          font: "Calibri",
+          size: 24,
+          bold: true,
+          color: INK,
+        }),
+      ],
+    }),
+
+    // 4. Bloque Institucional
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [
+        new TextRun({
+          text: "CORPORACIÓN UNIVERSITARIA LATINOAMERICANA (CUL)",
+          font: "Calibri",
+          size: 24,
+          bold: true,
+          color: PRIMARY,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [
+        new TextRun({
+          text: "Contaduría Pública",
+          font: "Calibri",
+          size: 22,
+          color: INK,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [
+        new TextRun({
+          text: "Barranquilla / Atlántico",
+          font: "Calibri",
+          size: 22,
+          color: INK,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [
+        new TextRun({
+          text: "Colombia",
+          font: "Calibri",
+          size: 22,
+          color: INK,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+      children: [
+        new TextRun({
+          text: "2026",
+          font: "Calibri",
+          size: 22,
+          bold: true,
+          color: INK,
+        }),
+      ],
+    }),
+
+    // Salto de página para que la portada ocupe su propia hoja
+    new Paragraph({
+      children: [new PageBreak()],
     }),
   ];
 
   const idRows = [
     ["Entidad Auditada", "Empresa de Acueducto y Alcantarillado de Bogotá E.S.P. (EAAB-ESP)"],
-    ["NIT / Identificación", "899.999.094-1"],
-    ["Domicilio Principal", "Avenida Calle 24 No. 37-15, Bogotá D.C., Colombia"],
+    ["Sigla / Nombre Comercial", "EAAB-ESP"],
+    ["NIT / Identificación Tributaria", "899.999.094-1"],
+    ["Domicilio Principal / Sede", "Avenida Calle 24 No. 37-15, Bogotá D.C., Colombia"],
     ["Naturaleza Jurídica", "Empresa Industrial y Comercial del Estado (EICE) del orden distrital"],
     ["Sector Económico", "Servicios públicos domiciliarios: acueducto y alcantarillado"],
-    ["Equipo de Auditoría", "ANDRES FELIPE BERNAL OSORIO (Auditor Líder / Coordinación y Redacción)"],
-    ["Asignatura", "ZCPVIIA AUDITORIA DE SISTEMA"],
-    ["Institución", "CORPORACION UNIVERSITARIA LATINOAMERICANA (CUL)"],
-    ["Docente Titular", "WILMER RUIZ BOTERO"],
-    ["Grupo / Curso", "8° SEMESTRE"],
-    ["Ciudad / Fecha", "BARRANQUILLA · 23 de agosto de 2026"],
+    ["Composición / Propietario", "100% pública (Distrito Capital de Bogotá)"],
+    ["Portal Web Oficial", "https://www.acueducto.com.co"],
+    ["Asignatura", "Auditoría de Sistemas (8° Semestre)"],
+    ["Alcance de la Auditoría", "Auditoría de Sistemas de Información, Procesos y Cumplimiento Normativo"],
+    ["Fecha de Evaluación", `Barranquilla · ${new Date().toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" })}`],
   ];
 
   const sectionsData = [
@@ -664,17 +790,22 @@ https://www.acueducto.com.co/wps/portal/EAB2/Home/la-empresa/responsabilidad_soc
   });
 
   const buffer = await Packer.toBuffer(doc);
-  const targetPath1 = "C:/Users/andre/OneDrive/Escritorio/UNIVERSIDAD/8 SEMESTRE/AUDITORIA DE SISTEMA/Bitacora_EAAB_Optimizada_2026-08-23.docx";
-  const targetPath2 = "C:/Users/andre/OneDrive/Escritorio/UNIVERSIDAD/8 SEMESTRE/AUDITORIA DE SISTEMA/Bitacora_EAAB_2026-08-23.docx";
+  const targetDir = "C:/Users/andre/OneDrive/Escritorio/UNIVERSIDAD/8 SEMESTRE/AUDITORIA DE SISTEMA";
+  const targetPath1 = `${targetDir}/Bitacora_EAAB_2026-08-24.docx`;
+  const targetPath2 = `${targetDir}/Bitacora_EAAB_Optimizada_2026-08-24.docx`;
   
-  fs.writeFileSync(targetPath1, buffer);
-  console.log("SUCCESSFULLY SAVED:", targetPath1);
+  try {
+    fs.writeFileSync(targetPath1, buffer);
+    console.log("SUCCESSFULLY SAVED:", targetPath1);
+  } catch (e) {
+    console.log("Could not overwrite targetPath1 (file might be open):", e.message);
+  }
 
   try {
     fs.writeFileSync(targetPath2, buffer);
     console.log("SUCCESSFULLY SAVED:", targetPath2);
   } catch (e) {
-    console.log("NOTE: Main file is currently open in Word. Saved as Bitacora_EAAB_Optimizada_2026-08-23.docx");
+    console.log("Could not write targetPath2:", e.message);
   }
 }
 

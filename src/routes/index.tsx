@@ -99,13 +99,13 @@ function Home() {
         </div>
 
         <h1 className="mt-2 font-display text-3xl leading-tight text-ink sm:text-4xl">
-          Bitácora de Investigación: EAAB-ESP
+          Bitácora de Investigación: {company.shortName || company.legalName || "Auditoría de Sistemas"}
         </h1>
 
         <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-ink-soft">
           Sistema centralizado para documentar, estructurar y auditar la información estratégica,
-          financiera y normativa de la <strong>Empresa de Acueducto y Alcantarillado de Bogotá</strong>.
-          Toda la evidencia, redacción y hallazgos registrados se sincronizan automáticamente en un reporte formal descargable en formato Word (.docx).
+          financiera, operativa y normativa de <strong>{company.legalName || company.shortName || "la entidad auditada"}</strong>.
+          Toda la evidencia, redacción y hallazgos registrados se sincronizan automáticamente en un reporte formal descargable en formato Word (.docx) con portada oficial universitaria.
         </p>
 
         <div className="mt-6 flex flex-wrap items-center gap-3">

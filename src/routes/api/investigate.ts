@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { classifyOfficial } from "@/lib/official-url";
 import { AUDITOR_UA, probeUrl } from "@/lib/probe-url";
 import type { InvestigateHit, InvestigateResponse } from "@/lib/investigate";
-import { PDF_ORGANIGRAMA, URL_FINANCIERA, sources as seedSources } from "@/lib/seed";
+import { PDF_ORGANIGRAMA, sources as seedSources } from "@/lib/seed";
 
-const HUBS = [
+const EAAB_HUBS = [
   { url: "https://www.acueducto.com.co/wps/portal/EAB2/Home/transparencia_informacion_publica", label: "Transparencia EAAB" },
   { url: "https://www.acueducto.com.co/wps/portal/EAB2/Home/transparencia_informacion_publica/informacion_entidad/mision_vision_funciones_deberes", label: "Misión, visión, funciones y deberes" },
   { url: "https://www.acueducto.com.co/wps/portal/EAB2/institucionales/la-empresa/informacion-general/vision-y-mision", label: "Visión y misión" },
@@ -28,6 +28,11 @@ const KNOWN_LAWS: { keys: string[]; title: string; url: string }[] = [
     url: "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=2752",
   },
   {
+    keys: ["43", "contador", "contaduria", "auditoria", "fe publica"],
+    title: "Ley 43 de 1990 — Estatuto del Contador Público y ejercicio de la auditoría en Colombia",
+    url: "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=269",
+  },
+  {
     keys: ["99", "ambiental", "medio ambiente", "sina", "recursos"],
     title: "Ley 99 de 1993 — Sistema Nacional Ambiental (SINA)",
     url: "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=297",
@@ -46,6 +51,11 @@ const KNOWN_LAWS: { keys: string[]; title: string; url: string }[] = [
     keys: ["143", "electricidad", "eléctrica"],
     title: "Ley 143 de 1994 — régimen eléctrico",
     url: "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=4631",
+  },
+  {
+    keys: ["222", "codigo de comercio", "sociedades", "estados financieros", "control interno"],
+    title: "Ley 222 de 1995 — reforma al Código de Comercio y régimen societario y contable",
+    url: "https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=4895",
   },
 ];
 
@@ -106,7 +116,7 @@ function score(query: string, title: string, href: string) {
   return s;
 }
 
-function extractLinks(html: string, pageUrl: string) {
+function extractLinks(html: string, pageUrl: string, companyWebsite?: string) {
   const out: { href: string; text: string }[] = [];
   const re = /<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
   let m: RegExpExecArray | null;
@@ -119,7 +129,7 @@ function extractLinks(html: string, pageUrl: string) {
     } catch {
       continue;
     }
-    if (!classifyOfficial(href).official) continue;
+    if (!classifyOfficial(href, companyWebsite).official) continue;
     if (/politica-de-cookies|facebook|twitter|linkedin|youtube|instagram|norma_error|error\.php/i.test(href)) continue;
     out.push({ href: normUrl(href), text });
   }
@@ -148,98 +158,135 @@ export const Route = createFileRoute("/api/investigate")({
     handlers: {
       POST: async ({ request }) => {
         try {
-        const body = (await request.json().catch(() => null)) as { query?: string } | null;
-        const query = (body?.query || "").trim();
-        if (query.length < 3) {
-          return Response.json({ error: "Escriba qué buscar (mínimo 3 letras)." }, { status: 400 });
-        }
+          const body = (await request.json().catch(() => null)) as {
+            query?: string;
+            companyWebsite?: string;
+            companyName?: string;
+          } | null;
 
-        if (looksLikeUrl(query)) {
-          const check = await probeUrl(query);
-          const payload: InvestigateResponse = {
-            query,
-            note: check.official
-              ? "URL pegada: se validó contra dominio oficial."
-              : "Esa URL no es acueducto.com.co ni .gov.co.",
-            hits: [
-              {
-                title: query,
-                url: check.finalUrl || query,
-                hub: "URL pegada",
-                check,
-              },
-            ],
+          const query = (body?.query || "").trim();
+          const companyWebsite = (body?.companyWebsite || "").trim();
+          const companyName = (body?.companyName || "").trim();
+
+          if (query.length < 3) {
+            return Response.json({ error: "Escriba qué buscar (mínimo 3 letras)." }, { status: 400 });
+          }
+
+          if (looksLikeUrl(query)) {
+            const check = await probeUrl(query, companyWebsite);
+            let pageTitle = query;
+            if (check.live) {
+              const html = await fetchHub(query);
+              const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+              if (titleMatch && titleMatch[1].trim()) {
+                pageTitle = titleMatch[1].trim();
+              }
+            }
+            const payload: InvestigateResponse = {
+              query,
+              note: check.official
+                ? `URL validada con éxito como dominio oficial (${check.reason}).`
+                : `URL alcanzable, pero no coincide con dominios oficiales registrados.`,
+              hits: [
+                {
+                  title: pageTitle,
+                  url: check.finalUrl || query,
+                  hub: "URL Oficial Consultada",
+                  check,
+                },
+              ],
+            };
+            return Response.json(payload);
+          }
+
+          type Cand = { title: string; url: string; hub: string; pts: number };
+          const bag = new Map<string, Cand>();
+          const add = (c: Cand) => {
+            const key = c.url.toLowerCase();
+            const prev = bag.get(key);
+            if (!prev || c.pts > prev.pts) bag.set(key, c);
           };
-          return Response.json(payload);
-        }
 
-        type Cand = { title: string; url: string; hub: string; pts: number };
-        const bag = new Map<string, Cand>();
-        const add = (c: Cand) => {
-          const key = c.url.toLowerCase();
-          const prev = bag.get(key);
-          if (!prev || c.pts > prev.pts) bag.set(key, c);
-        };
+          // 1. Fuentes conocidas del seed
+          for (const s of seedSources) {
+            const pts = score(query, `${s.name} ${s.notes}`, s.url);
+            if (pts > 0) add({ title: s.name, url: normUrl(s.url), hub: "Fuentes de la Bitácora", pts: pts + 3 });
+          }
 
-        for (const s of seedSources) {
-          const pts = score(query, `${s.name} ${s.notes}`, s.url);
-          if (pts > 0) add({ title: s.name, url: normUrl(s.url), hub: "Fuentes ya citadas", pts: pts + 3 });
-        }
-        add({
-          title: "Organigrama EAAB-ESP (PDF, 18 de agosto de 2026)",
-          url: PDF_ORGANIGRAMA,
-          hub: "Organigrama",
-          pts: score(query, "organigrama estructura gerencia general", PDF_ORGANIGRAMA),
-        });
-        for (const law of KNOWN_LAWS) {
-          const pts = score(query, law.keys.join(" ") + " " + law.title, law.url);
-          if (pts > 0) add({ title: law.title, url: law.url, hub: "Función Pública", pts: pts + 8 });
-        }
+          // 2. Marco legal colombiano
+          for (const law of KNOWN_LAWS) {
+            const pts = score(query, law.keys.join(" ") + " " + law.title, law.url);
+            if (pts > 0) add({ title: law.title, url: law.url, hub: "Función Pública / Normatividad", pts: pts + 8 });
+          }
 
-        const pages = await Promise.allSettled(
-          HUBS.map(async (hub) => {
-            const html = await fetchHub(hub.url);
-            return { hub, html };
-          }),
-        );
-        for (const p of pages) {
-          if (p.status !== "fulfilled") continue;
-          const { hub, html } = p.value;
-          const hubPts = score(query, hub.label, hub.url);
-          if (hubPts > 0) {
+          // 3. Hubs a consultar (sitio oficial de la empresa o EAAB por defecto)
+          const hubsToScan: { url: string; label: string }[] = [];
+
+          if (companyWebsite && companyWebsite.startsWith("http")) {
+            const cleanBase = companyWebsite.replace(/\/$/, "");
+            hubsToScan.push(
+              { url: cleanBase, label: `${companyName || "Empresa"} - Inicio Oficial` },
+              { url: `${cleanBase}/transparencia`, label: "Transparencia y Acceso a la Información" },
+              { url: `${cleanBase}/quienes-somos`, label: "Quiénes Somos / Misión y Visión" },
+              { url: `${cleanBase}/organigrama`, label: "Estructura Orgánica" },
+              { url: `${cleanBase}/gobierno-corporativo`, label: "Gobierno Corporativo y Políticas" },
+              { url: `${cleanBase}/sostenibilidad`, label: "Sostenibilidad y RSE" },
+            );
+          } else {
+            hubsToScan.push(...EAAB_HUBS);
             add({
-              title: hub.label,
-              url: normUrl(hub.url),
-              hub: hub.label,
-              pts: hubPts,
+              title: "Organigrama EAAB-ESP (PDF, 18 de agosto de 2026)",
+              url: PDF_ORGANIGRAMA,
+              hub: "Organigrama",
+              pts: score(query, "organigrama estructura gerencia general", PDF_ORGANIGRAMA),
             });
           }
-          for (const link of extractLinks(html, hub.url)) {
-            const title = titleFrom(link.text, link.href);
-            const pts = score(query, title, link.href);
-            if (pts <= 0) continue;
-            add({ title, url: link.href, hub: hub.label, pts });
+
+          const pages = await Promise.allSettled(
+            hubsToScan.map(async (hub) => {
+              const html = await fetchHub(hub.url);
+              return { hub, html };
+            }),
+          );
+
+          for (const p of pages) {
+            if (p.status !== "fulfilled") continue;
+            const { hub, html } = p.value;
+            const hubPts = score(query, hub.label, hub.url);
+            if (hubPts > 0) {
+              add({
+                title: hub.label,
+                url: normUrl(hub.url),
+                hub: hub.label,
+                pts: hubPts,
+              });
+            }
+            for (const link of extractLinks(html, hub.url, companyWebsite)) {
+              const title = titleFrom(link.text, link.href);
+              const pts = score(query, title, link.href);
+              if (pts <= 0) continue;
+              add({ title, url: link.href, hub: hub.label, pts });
+            }
           }
-        }
 
-        const ranked = [...bag.values()].filter((c) => c.pts > 0).sort((a, b) => b.pts - a.pts).slice(0, 8);
-        const hits: InvestigateHit[] = [];
-        for (const c of ranked) {
-          const check = await probeUrl(c.url);
-          if (!check.official) continue;
-          const final = check.finalUrl || c.url;
-          if (/error\.php|norma_error/i.test(final)) continue;
-          hits.push({ title: c.title, url: final, hub: c.hub, check });
-        }
+          const ranked = [...bag.values()].filter((c) => c.pts > 0).sort((a, b) => b.pts - a.pts).slice(0, 8);
+          const hits: InvestigateHit[] = [];
+          for (const c of ranked) {
+            const check = await probeUrl(c.url, companyWebsite);
+            if (!check.official) continue;
+            const final = check.finalUrl || c.url;
+            if (/error\.php|norma_error/i.test(final)) continue;
+            hits.push({ title: c.title, url: final, hub: c.hub, check });
+          }
 
-        const payload: InvestigateResponse = {
-          query,
-          hits,
-          note: hits.length
-            ? "Solo se listan dominios oficiales (acueducto.com.co o .gov.co) que se pudieron consultar."
-            : "No hubo coincidencias oficiales. Pruebe con otras palabras o pegue la URL https://…",
-        };
-        return Response.json(payload);
+          const payload: InvestigateResponse = {
+            query,
+            hits,
+            note: hits.length
+              ? `Se localizaron ${hits.length} fuentes y enlaces oficiales verificados para ${companyName || "la auditoría"}.`
+              : "No se encontraron enlaces oficiales directos. Puedes pegar la URL exacta (https://...) para validarla y añadirla en 1-clic.",
+          };
+          return Response.json(payload);
         } catch (err) {
           const message = err instanceof Error ? err.message : "error";
           return Response.json({ error: message, query: "" }, { status: 500 });

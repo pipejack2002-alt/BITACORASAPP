@@ -37,8 +37,8 @@ function looseHead(url: string): Promise<{ status: number; finalUrl: string }> {
   });
 }
 
-export async function probeUrl(url: string): Promise<UrlCheck> {
-  const local = classifyOfficial(url);
+export async function probeUrl(url: string, companyWebsite?: string): Promise<UrlCheck> {
+  const local = classifyOfficial(url, companyWebsite);
   const checkedAt = new Date().toISOString();
   if (!local.host) {
     return {
@@ -68,7 +68,7 @@ export async function probeUrl(url: string): Promise<UrlCheck> {
     }
     const finalUrl = res.url || url;
     const live = res.status >= 200 && res.status < 400;
-    const finalHost = classifyOfficial(finalUrl);
+    const finalHost = classifyOfficial(finalUrl, companyWebsite);
     if (live) {
       return {
         official: local.official || finalHost.official,

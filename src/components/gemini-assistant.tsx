@@ -45,6 +45,7 @@ export function GeminiAssistantModal({
   triggerClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const company = useBitacora((s) => s.company);
   const geminiApiKey = useBitacora((s) => s.geminiApiKey || "");
   const geminiModel = useBitacora((s) => s.geminiModel || "gemini-3.6-flash");
   const setGeminiKey = useBitacora((s) => s.setGeminiKey);
@@ -66,22 +67,24 @@ export function GeminiAssistantModal({
   const [busy, setBusy] = useState(false);
   const [response, setResponse] = useState("");
 
+  const compLabel = company.shortName || company.legalName || "la entidad auditada";
+
   const quickPrompts = [
     {
       label: "📝 Redactar análisis de sección",
-      text: `Elabora una redacción analítica, formal y académica sobre la sección «${sections[selectedSection]?.title || selectedSection}» de la EAAB-ESP. Incluye antecedentes, importancia estratégica y marco legal correspondiente.`,
+      text: `Elabora una redacción analítica, formal y académica sobre la sección «${sections[selectedSection]?.title || selectedSection}» de ${compLabel}. Incluye antecedentes, importancia estratégica y marco regulatorio correspondiente.`,
     },
     {
       label: "📊 Resumir cifras clave y estado",
-      text: "Extrae y organiza en viñetas claras los datos numéricos, fechas, acuerdos y resoluciones más importantes de la EAAB-ESP mencionados en el contexto.",
+      text: `Extrae y organiza en viñetas claras los datos numéricos, fechas, acuerdos y resoluciones más importantes de ${compLabel} mencionados en el contexto.`,
     },
     {
       label: "🎯 Matriz DOFA Estratégica",
-      text: "Estructura una matriz DOFA (Fortalezas, Oportunidades, Debilidades, Amenazas) rigurosa para la EAAB-ESP con base en su naturaleza de servicio público esencial y los retos hídricos de Bogotá.",
+      text: `Estructura una matriz DOFA (Fortalezas, Oportunidades, Debilidades, Amenazas) rigurosa para ${compLabel} con base en su sector (${company.sector || "su actividad"}), sus procesos y riesgos operativos de TI.`,
     },
     {
       label: "⚖️ Marco Normativo y de Control",
-      text: "Sintetiza cómo aplican la Ley 142 de 1994, la Ley 1712 de 2014, el Decreto 1076 de 2015 y los entes de control (SSPD, CRA, Contraloría) a la operación de la EAAB.",
+      text: `Sintetiza cómo aplica el marco normativo (Ley 43 de 1990, Ley 1581 de 2012, normas sectoriales y entes de control) a la operación y auditoría de ${compLabel}.`,
     },
   ];
 
@@ -117,6 +120,7 @@ export function GeminiAssistantModal({
           prompt: textToAsk.trim(),
           context: secContext,
           sectionTitle: activeSec?.title || selectedSection,
+          company,
           model: geminiModel,
           apiKey: activeKey,
         }),

@@ -69,19 +69,19 @@ export const STATUS_LABEL: Record<string, string> = {
 const TODAY = "2026-08-23";
 
 export const meta: Meta = {
-  course: "ZCPVIIA AUDITORIA DE SISTEMA",
-  institution: "CORPORACION UNIVERSITARIA LATINOAMERICANA (CUL)",
+  course: "AUDITORIA DE SISTEMA",
+  institution: "CORPORACIÓN UNIVERSITARIA LATINOAMERICANA (CUL)",
   professor: "WILMER RUIZ BOTERO",
-  groupName: "8° SEMESTRE",
-  city: "BARRANQUILLA",
+  groupName: "8° SEMESTRE · CONTADURÍA PÚBLICA",
+  city: "BARRANQUILLA / ATLÁNTICO",
 };
 
 export const team: TeamMember[] = [
-  { id: "m1", name: "ANDRES FELIPE BERNAL OSORIO", role: "Auditor Líder / Coordinación y Redacción" },
-  { id: "m2", name: "", role: "Identidad Institucional y Direccionamiento Estratégico" },
-  { id: "m3", name: "", role: "Estructura Organizacional y Manual de Procesos" },
-  { id: "m4", name: "", role: "Marco Normativo Legal y Gestión Ambiental" },
-  { id: "m5", name: "", role: "Partes Interesadas y Referencias APA 7" },
+  { id: "m1", name: "BERNAL OSORIO ANDRES", role: "Auditor Líder / Coordinación y Redacción" },
+  { id: "m2", name: "VIZCAINO ESCAMILLA MARIA", role: "Auditora / Identidad y Direccionamiento Institucional" },
+  { id: "m3", name: "MERCADO EGUIS SHADIA", role: "Auditora / Marco Normativo, Ambiental y Evidencias" },
+  { id: "m4", name: "", role: "Auditor / Arquitectura de Procesos y Sistemas de Información" },
+  { id: "m5", name: "", role: "Auditor / Análisis Financiero y Control Interno" },
 ];
 
 export const company: Company = {

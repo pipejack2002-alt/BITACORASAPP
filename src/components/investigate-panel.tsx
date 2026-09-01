@@ -25,6 +25,7 @@ const SECTION_SUGGESTIONS: Record<string, string[]> = {
 };
 
 export function InvestigatePanel({ defaultSection }: { defaultSection?: SectionId }) {
+  const company = useBitacora((s) => s.company);
   const sections = useBitacora((s) => s.sections);
   const sectionOrder = useBitacora((s) => s.sectionOrder);
   const team = useBitacora((s) => s.team);
@@ -41,12 +42,14 @@ export function InvestigatePanel({ defaultSection }: { defaultSection?: SectionI
   const [added, setAdded] = useState<string[]>([]);
   const [inserted, setInserted] = useState<string[]>([]);
 
-  const suggestions = SECTION_SUGGESTIONS[sectionId] || [
-    "Transparencia EAAB",
+  const companyTag = company.shortName || "la entidad";
+  const rawSuggestions = SECTION_SUGGESTIONS[sectionId] || [
+    `Transparencia ${companyTag}`,
     "Ley 1712",
     "Estados financieros",
     "Código de ética",
   ];
+  const suggestions = rawSuggestions.map((s) => s.replace("EAAB", companyTag));
 
   async function executeSearch(targetQuery: string) {
     if (targetQuery.trim().length < 3) return;
@@ -57,7 +60,11 @@ export function InvestigatePanel({ defaultSection }: { defaultSection?: SectionI
       const res = await fetch("/api/investigate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: targetQuery.trim() }),
+        body: JSON.stringify({
+          query: targetQuery.trim(),
+          companyWebsite: company.website,
+          companyName: company.shortName || company.legalName,
+        }),
       });
       const data = (await res.json()) as InvestigateResponse & { error?: string };
       if (!res.ok) {
@@ -141,7 +148,7 @@ export function InvestigatePanel({ defaultSection }: { defaultSection?: SectionI
         <h2 className="font-display text-xl text-ink">Asistente de Investigación Oficial 1-Click</h2>
       </div>
       <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-        Busca en vivo en los portales oficiales de la EAAB (`acueducto.com.co`) y del Estado (`.gov.co`). Valida enlaces y te permite agregarlos a la bitácora o insertarlos directamente en el texto de la sección.
+        Busca en vivo en los portales oficiales de {company.shortName || "la entidad auditada"} ({company.website || "web oficial"}), fuentes normativas y portales del Estado (.gov.co). Valida enlaces automáticamente y te permite insertarlos en el texto de la sección y en las citas APA 7 con 1 solo clic.
       </p>
 
       {/* Chips de sugerencias contextuales rápidas */}
