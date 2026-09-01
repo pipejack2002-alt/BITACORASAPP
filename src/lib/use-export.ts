@@ -17,12 +17,10 @@ export function useExportWord() {
       useBitacora.getState().markExported();
       useBitacora.getState().setLastDownload({ href: "/api/word", filename });
       const via = await saveWordToPc(blob, filename);
-      if (via === "guardado" || via === "compartido") {
-        toast.success("Word guardado en el PC");
-      } else if (via === "cancelado") {
-        toast.message("No se guardó.");
+      if (via === "guardado") {
+        toast.success("Documento Word (.docx) descargado con éxito");
       } else {
-        toast.success("Si no bajó, se copió el enlace. Ábrelo en una pestaña nueva.", {
+        toast.success("Descarga iniciada. Si no bajó, abre el enlace:", {
           description: wordHref(),
         });
       }
