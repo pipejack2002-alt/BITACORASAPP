@@ -2,12 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createInitialState } from "@/lib/seed";
-import { buildDocx } from "@/lib/export-docx";
+import { buildDocx, wordFilename } from "@/lib/export-docx";
 
 const MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 const files = new Map<string, { bytes: Uint8Array; filename: string; type: string }>();
 const EXPORT_DIR = join(process.cwd(), "public", "exports");
-const LATEST = "Bitacora_EAAB.docx";
+
+function getDynamicFilename() {
+  return wordFilename("EAAB");
+}
 
 function asciiFilename(name: string) {
   return name.replace(/[^\w.\-]+/g, "_");
@@ -33,7 +36,7 @@ async function persist(bytes: Uint8Array, filename: string) {
   try {
     await mkdir(EXPORT_DIR, { recursive: true });
     await writeFile(join(EXPORT_DIR, asciiFilename(filename)), bytes);
-    await writeFile(join(EXPORT_DIR, LATEST), bytes);
+    await writeFile(join(EXPORT_DIR, getDynamicFilename()), bytes);
   } catch (err) {
     // Disk write might fail on serverless or read-only filesystems (e.g. Vercel)
     console.warn("[api/word] No se pudo escribir en disco, sirviendo desde memoria:", err);
@@ -43,7 +46,7 @@ async function persist(bytes: Uint8Array, filename: string) {
 async function latestFromDisk() {
   if (latestInMemory) return latestInMemory;
   try {
-    const bytes = new Uint8Array(await readFile(join(EXPORT_DIR, LATEST)));
+    const bytes = new Uint8Array(await readFile(join(EXPORT_DIR, getDynamicFilename())));
     latestInMemory = bytes;
     return bytes;
   } catch {
@@ -54,7 +57,7 @@ async function latestFromDisk() {
 async function seedDocx() {
   const blob = await buildDocx(createInitialState());
   const bytes = new Uint8Array(await blob.arrayBuffer());
-  await persist(bytes, LATEST);
+  await persist(bytes, getDynamicFilename());
   return bytes;
 }
 
@@ -67,7 +70,7 @@ export const Route = createFileRoute("/api/word")({
         if (!(file instanceof Blob)) {
           return new Response("missing file", { status: 400 });
         }
-        const filename = asciiFilename(String(form.get("filename") || LATEST));
+        const filename = asciiFilename(String(form.get("filename") || getDynamicFilename()));
         const id = crypto.randomUUID();
         const bytes = new Uint8Array(await file.arrayBuffer());
         files.set(id, { bytes, filename, type: MIME });
@@ -89,9 +92,9 @@ export const Route = createFileRoute("/api/word")({
           if (rec) return attachment(rec.bytes, rec.filename);
         }
         const disk = await latestFromDisk();
-        if (disk) return attachment(disk, LATEST);
+        if (disk) return attachment(disk, getDynamicFilename());
         const generated = await seedDocx();
-        return attachment(generated, LATEST);
+        return attachment(generated, getDynamicFilename());
       },
     },
   },
