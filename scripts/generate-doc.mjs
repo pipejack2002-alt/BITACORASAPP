@@ -6,6 +6,7 @@ import {
   Footer,
   Header,
   HeadingLevel,
+  ImageRun,
   Packer,
   PageBreak,
   PageNumber,
@@ -208,43 +209,49 @@ function infoTable(rows) {
 }
 
 async function run() {
+  const logoBuffer = fs.readFileSync('./public/university-logo.png');
+
   const coverBits = [
-    // 1. Título General
+    // 1. Logotipo Oficial CUL
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { before: 300, after: 120 },
+      spacing: { before: 100, after: 200 },
+      children: [
+        new ImageRun({
+          data: logoBuffer,
+          transformation: {
+            width: 145,
+            height: 150,
+          },
+          type: "png",
+        }),
+      ],
+    }),
+
+    // 2. Título de la Bitácora
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 100, after: 400 },
       children: [
         new TextRun({
           text: "Bitácora Empresa de Acueducto y Alcantarillado de Bogotá E.S.P. (EAAB-ESP)",
           font: "Calibri",
-          size: 28,
+          size: 26,
           bold: true,
-          color: PRIMARY,
-        }),
-      ],
-    }),
-    new Paragraph({
-      alignment: AlignmentType.CENTER,
-      spacing: { after: 700 },
-      children: [
-        new TextRun({
-          text: "BITÁCORA DE INVESTIGACIÓN Y AUDITORÍA DE SISTEMAS",
-          font: "Calibri",
-          size: 22,
-          color: MUTED,
+          color: INK,
         }),
       ],
     }),
 
-    // 2. Estudiantes del Equipo en mayúsculas
+    // 3. Estudiantes del Equipo en mayúsculas sostenidas
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 120 },
+      spacing: { after: 80 },
       children: [
         new TextRun({
           text: "BERNAL OSORIO ANDRES",
           font: "Calibri",
-          size: 24,
+          size: 22,
           bold: true,
           color: INK,
         }),
@@ -252,12 +259,12 @@ async function run() {
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 120 },
+      spacing: { after: 80 },
       children: [
         new TextRun({
           text: "VIZCAINO ESCAMILLA MARIA",
           font: "Calibri",
-          size: 24,
+          size: 22,
           bold: true,
           color: INK,
         }),
@@ -265,66 +272,94 @@ async function run() {
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 120 },
+      spacing: { after: 80 },
       children: [
         new TextRun({
           text: "MERCADO EGUIS SHADIA",
           font: "Calibri",
-          size: 24,
+          size: 22,
           bold: true,
           color: INK,
         }),
       ],
     }),
 
-    // 3. Docente
+    // 4. Bloque Docente
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { before: 600, after: 80 },
+      spacing: { before: 300, after: 60 },
       children: [
         new TextRun({
           text: "DOCENTE",
           font: "Calibri",
-          size: 22,
+          size: 20,
           bold: true,
-          color: PRIMARY,
+          color: INK,
         }),
       ],
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 700 },
+      spacing: { after: 250 },
       children: [
         new TextRun({
           text: "RUIZ BOTERO WILMER",
           font: "Calibri",
-          size: 24,
+          size: 22,
           bold: true,
           color: INK,
         }),
       ],
     }),
 
-    // 4. Bloque Institucional
+    // 5. Bloque Asignatura
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 60 },
+      spacing: { before: 100, after: 60 },
       children: [
         new TextRun({
-          text: "CORPORACIÓN UNIVERSITARIA LATINOAMERICANA (CUL)",
+          text: "ASIGNATURA",
           font: "Calibri",
-          size: 24,
+          size: 20,
           bold: true,
-          color: PRIMARY,
+          color: INK,
         }),
       ],
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 60 },
+      spacing: { after: 300 },
       children: [
         new TextRun({
-          text: "Contaduría Pública",
+          text: "ZCPVIIIA AUDITORIA DE SISTEMA",
+          font: "Calibri",
+          size: 22,
+          bold: true,
+          color: INK,
+        }),
+      ],
+    }),
+
+    // 6. Bloque Institucional Inferior
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 50 },
+      children: [
+        new TextRun({
+          text: "Corporación Universitaria Latinoamericana",
+          font: "Calibri",
+          size: 22,
+          bold: true,
+          color: INK,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 50 },
+      children: [
+        new TextRun({
+          text: "Contaduría Publica",
           font: "Calibri",
           size: 22,
           color: INK,
@@ -333,10 +368,10 @@ async function run() {
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 60 },
+      spacing: { after: 50 },
       children: [
         new TextRun({
-          text: "Barranquilla / Atlántico",
+          text: "Barranquilla/Atlántico",
           font: "Calibri",
           size: 22,
           color: INK,
@@ -345,7 +380,7 @@ async function run() {
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 60 },
+      spacing: { after: 50 },
       children: [
         new TextRun({
           text: "Colombia",
@@ -357,7 +392,7 @@ async function run() {
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 200 },
+      spacing: { after: 150 },
       children: [
         new TextRun({
           text: "2026",
@@ -792,7 +827,8 @@ https://www.acueducto.com.co/wps/portal/EAB2/Home/la-empresa/responsabilidad_soc
   const buffer = await Packer.toBuffer(doc);
   const targetDir = "C:/Users/andre/OneDrive/Escritorio/UNIVERSIDAD/8 SEMESTRE/AUDITORIA DE SISTEMA";
   const targetPath1 = `${targetDir}/Bitacora_EAAB_2026-08-24.docx`;
-  const targetPath2 = `${targetDir}/Bitacora_EAAB_Optimizada_2026-08-24.docx`;
+  const targetPath2 = `${targetDir}/Bitacora_EAAB_2026-08-31.docx`;
+  const targetPath3 = `${targetDir}/Bitacora_EAAB_Optimizada_2026-08-24.docx`;
   
   try {
     fs.writeFileSync(targetPath1, buffer);
@@ -806,6 +842,13 @@ https://www.acueducto.com.co/wps/portal/EAB2/Home/la-empresa/responsabilidad_soc
     console.log("SUCCESSFULLY SAVED:", targetPath2);
   } catch (e) {
     console.log("Could not write targetPath2:", e.message);
+  }
+
+  try {
+    fs.writeFileSync(targetPath3, buffer);
+    console.log("SUCCESSFULLY SAVED:", targetPath3);
+  } catch (e) {
+    console.log("Could not write targetPath3:", e.message);
   }
 }
 

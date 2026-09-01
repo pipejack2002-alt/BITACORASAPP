@@ -5,6 +5,7 @@ import {
   Footer,
   Header,
   HeadingLevel,
+  ImageRun,
   Packer,
   PageBreak,
   PageNumber,
@@ -20,6 +21,7 @@ import {
 import { ATTACHMENT_KIND_LABEL } from "./seed";
 import { formatApa7Citation } from "./apa";
 import { formatDateTime } from "./utils";
+import { getUniversityLogoUint8Array } from "./university-logo";
 import type { BitacoraState, SectionId } from "./types";
 
 // Paleta ejecutiva formal APA 7
@@ -239,44 +241,48 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
         ];
 
   const coverBits: Paragraph[] = [
-    // 1. Título General y Entidad Auditada
+    // 1. Logotipo Oficial de la Universidad CUL
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { before: 300, after: 120 },
+      spacing: { before: 100, after: 200 },
       children: [
-        new TextRun({
-          text: `Bitácora ${state.company.legalName || state.company.shortName}`,
-          font: "Calibri",
-          size: 28,
-          bold: true,
-          color: PRIMARY,
-        }),
-      ],
-    }),
-    new Paragraph({
-      alignment: AlignmentType.CENTER,
-      spacing: { after: 700 },
-      children: [
-        new TextRun({
-          text: "BITÁCORA DE INVESTIGACIÓN Y AUDITORÍA DE SISTEMAS",
-          font: "Calibri",
-          size: 22,
-          color: MUTED,
+        new ImageRun({
+          data: getUniversityLogoUint8Array(),
+          transformation: {
+            width: 145,
+            height: 150,
+          },
+          type: "png",
         }),
       ],
     }),
 
-    // 2. Integrantes del Equipo (Estudiantes en mayúsculas)
+    // 2. Título de la Bitácora
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 100, after: 400 },
+      children: [
+        new TextRun({
+          text: `Bitácora ${state.company.legalName || state.company.shortName}`,
+          font: "Calibri",
+          size: 26,
+          bold: true,
+          color: INK,
+        }),
+      ],
+    }),
+
+    // 3. Integrantes del Equipo (Estudiantes en mayúsculas sostenidas)
     ...activeStudents.map(
       (s) =>
         new Paragraph({
           alignment: AlignmentType.CENTER,
-          spacing: { after: 120 },
+          spacing: { after: 80 },
           children: [
             new TextRun({
               text: s.name.toUpperCase(),
               font: "Calibri",
-              size: 24,
+              size: 22,
               bold: true,
               color: INK,
             }),
@@ -284,54 +290,82 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
         }),
     ),
 
-    // 3. Bloque del Docente
+    // 4. Bloque del Docente
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { before: 600, after: 80 },
+      spacing: { before: 300, after: 60 },
       children: [
         new TextRun({
           text: "DOCENTE",
           font: "Calibri",
-          size: 22,
+          size: 20,
           bold: true,
-          color: PRIMARY,
+          color: INK,
         }),
       ],
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 700 },
+      spacing: { after: 250 },
       children: [
         new TextRun({
           text: (state.meta.professor || "RUIZ BOTERO WILMER").toUpperCase(),
           font: "Calibri",
-          size: 24,
+          size: 22,
           bold: true,
           color: INK,
         }),
       ],
     }),
 
-    // 4. Bloque Institucional Inferior
+    // 5. Bloque de Asignatura
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 60 },
+      spacing: { before: 100, after: 60 },
       children: [
         new TextRun({
-          text: (state.meta.institution || "Corporación Universitaria Latinoamericana (CUL)").toUpperCase(),
+          text: "ASIGNATURA",
           font: "Calibri",
-          size: 24,
+          size: 20,
           bold: true,
-          color: PRIMARY,
+          color: INK,
         }),
       ],
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 60 },
+      spacing: { after: 300 },
       children: [
         new TextRun({
-          text: "Contaduría Pública",
+          text: (state.meta.course || "ZCPVIIIA AUDITORIA DE SISTEMA").toUpperCase(),
+          font: "Calibri",
+          size: 22,
+          bold: true,
+          color: INK,
+        }),
+      ],
+    }),
+
+    // 6. Bloque Institucional Inferior
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 50 },
+      children: [
+        new TextRun({
+          text: state.meta.institution || "Corporación Universitaria Latinoamericana",
+          font: "Calibri",
+          size: 22,
+          bold: true,
+          color: INK,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 50 },
+      children: [
+        new TextRun({
+          text: "Contaduría Publica",
           font: "Calibri",
           size: 22,
           color: INK,
@@ -340,10 +374,10 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 60 },
+      spacing: { after: 50 },
       children: [
         new TextRun({
-          text: state.meta.city || "Barranquilla / Atlántico",
+          text: state.meta.city || "Barranquilla/Atlántico",
           font: "Calibri",
           size: 22,
           color: INK,
@@ -352,7 +386,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 60 },
+      spacing: { after: 50 },
       children: [
         new TextRun({
           text: "Colombia",
@@ -364,7 +398,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 200 },
+      spacing: { after: 150 },
       children: [
         new TextRun({
           text: `${new Date().getFullYear()}`,
@@ -384,20 +418,32 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
 
   const idRows: [string, string][] = [
     ["Entidad Auditada", state.company.legalName || state.company.shortName],
-    ["Sigla / Nombre Comercial", state.company.shortName],
     ["NIT / Identificación Tributaria", state.company.nit],
     ["Domicilio Principal / Sede", state.company.headquarters],
     ["Naturaleza Jurídica", state.company.nature],
     ["Sector Económico", state.company.sector],
     ["Composición / Propietario", state.company.majorityShareholder],
     ["Portal Web Oficial", state.company.website],
-    ["Asignatura", state.meta.course || "Auditoría de Sistemas"],
+    ["Asignatura", state.meta.course || "ZCPVIIIA AUDITORIA DE SISTEMA"],
     ["Alcance de la Auditoría", "Auditoría de Sistemas de Información, Procesos y Cumplimiento Normativo"],
     ["Fecha de Evaluación", `${state.meta.city || "Barranquilla"} · ${new Date().toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" })}`],
   ].filter(([, v]) => v.trim().length > 0) as [string, string][];
 
   const children: (Paragraph | Table)[] = [
     ...coverBits,
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 100, after: 180 },
+      children: [
+        new TextRun({
+          text: state.company.legalName || state.company.shortName,
+          font: "Calibri",
+          size: 24,
+          bold: true,
+          color: PRIMARY,
+        }),
+      ],
+    }),
     heading("1. Ficha de Identificación Institucional"),
     infoTable(idRows),
   ];
