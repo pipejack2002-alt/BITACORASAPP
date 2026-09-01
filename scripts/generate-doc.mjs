@@ -702,7 +702,20 @@ https://www.acueducto.com.co/wps/portal/EAB2/Home/la-empresa/responsabilidad_soc
   ];
 
   const children = [
-    ...coverBits,
+    // Título de la empresa (encabeza la sección 2 / cuerpo del documento)
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 100, after: 180 },
+      children: [
+        new TextRun({
+          text: "Empresa de Acueducto y Alcantarillado de Bogotá E.S.P. (EAAB-ESP)",
+          font: "Calibri",
+          size: 24,
+          bold: true,
+          color: PRIMARY,
+        }),
+      ],
+    }),
     heading("1. Ficha de Identificación Institucional"),
     infoTable(idRows),
   ];
@@ -772,13 +785,22 @@ https://www.acueducto.com.co/wps/portal/EAB2/Home/la-empresa/responsabilidad_soc
     }
   });
 
+  const pageMargin = { top: 1150, bottom: 1150, left: 1150, right: 1150 };
+
   const doc = new Document({
     sections: [
+      // ── SECCIÓN 1: PORTADA LIMPIA (sin encabezado ni pie de página) ──
       {
         properties: {
-          page: {
-            margin: { top: 1150, bottom: 1150, left: 1150, right: 1150 },
-          },
+          page: { margin: pageMargin },
+          titlePage: true,
+        },
+        children: coverBits,
+      },
+      // ── SECCIÓN 2: CUERPO DEL DOCUMENTO (con encabezado y pie corporativo) ──
+      {
+        properties: {
+          page: { margin: pageMargin },
         },
         headers: {
           default: new Header({
@@ -824,6 +846,7 @@ https://www.acueducto.com.co/wps/portal/EAB2/Home/la-empresa/responsabilidad_soc
       },
     ],
   });
+
 
   const buffer = await Packer.toBuffer(doc);
   const targetDir = "C:/Users/andre/OneDrive/Escritorio/UNIVERSIDAD/8 SEMESTRE/AUDITORIA DE SISTEMA";

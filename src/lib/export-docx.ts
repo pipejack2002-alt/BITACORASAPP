@@ -429,8 +429,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
     ["Fecha de Evaluación", `${state.meta.city || "Barranquilla"} · ${new Date().toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" })}`],
   ].filter(([, v]) => v.trim().length > 0) as [string, string][];
 
-  const children: (Paragraph | Table)[] = [
-    ...coverBits,
+  const bodyChildren: (Paragraph | Table)[] = [
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { before: 100, after: 180 },
@@ -454,26 +453,26 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
     const section = state.sections[id as SectionId];
     if (!section) continue;
 
-    children.push(heading(`${n}. ${section.title}`));
-    children.push(...bodyFromText(section.body));
+    bodyChildren.push(heading(`${n}. ${section.title}`));
+    bodyChildren.push(...bodyFromText(section.body));
 
     if (section.notes.trim()) {
-      children.push(p("Notas y Observaciones de Auditoría:", { bold: true, size: 22, color: PRIMARY }));
-      children.push(...bodyFromText(section.notes));
+      bodyChildren.push(p("Notas y Observaciones de Auditoría:", { bold: true, size: 22, color: PRIMARY }));
+      bodyChildren.push(...bodyFromText(section.notes));
     }
 
     const relatedFiles = state.attachments.filter((a) => a.sectionId === id);
     if (relatedFiles.length) {
-      children.push(p("Evidencias y Anexos Vinculados:", { bold: true, size: 22, color: PRIMARY }));
+      bodyChildren.push(p("Evidencias y Anexos Vinculados:", { bold: true, size: 22, color: PRIMARY }));
       for (const a of relatedFiles) {
-        children.push(
+        bodyChildren.push(
           p(
             `• ${a.title}  ·  ${ATTACHMENT_KIND_LABEL[a.kind]}${a.fileName ? " (" + a.fileName + ")" : ""}`,
             { bold: true, size: 20 },
           ),
         );
         if (a.extractedText.trim()) {
-          children.push(...bodyFromText(a.extractedText.slice(0, 4000)));
+          bodyChildren.push(...bodyFromText(a.extractedText.slice(0, 4000)));
         }
       }
     }
@@ -482,10 +481,10 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
 
   // Sección de Anexos Generales si existen
   if (state.attachments.length) {
-    children.push(heading(`${n}. Registro Consolidado de Anexos`));
+    bodyChildren.push(heading(`${n}. Registro Consolidado de Anexos`));
     state.attachments.forEach((a, i) => {
       const sec = state.sections[a.sectionId];
-      children.push(
+      bodyChildren.push(
         p(
           `${i + 1}. ${a.title} — Sección: ${sec?.title ?? a.sectionId} (${ATTACHMENT_KIND_LABEL[a.kind]}${a.fileName ? " · " + a.fileName : ""})`,
           { size: 20 },
@@ -496,7 +495,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
   }
 
   // Sección de Fuentes Consultadas bajo Norma APA 7ª Edición
-  children.push(heading(`${n}. Referencias y Fuentes Oficiales (Norma APA 7ª Edición)`));
+  bodyChildren.push(heading(`${n}. Referencias y Fuentes Oficiales (Norma APA 7ª Edición)`));
   state.sources.forEach((s, i) => {
     const apaText = formatApa7Citation(s, state.company.legalName || state.company.shortName);
     const parts = apaText.split(/(https?:\/\/[^\s]+)/g);
@@ -539,7 +538,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
       }
     }
 
-    children.push(
+    bodyChildren.push(
       new Paragraph({
         indent: { left: 400, hanging: 400 },
         spacing: { after: 80, line: 276 },
@@ -548,7 +547,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
     );
 
     if (s.notes) {
-      children.push(
+      bodyChildren.push(
         new Paragraph({
           indent: { left: 400 },
           spacing: { after: 120 },
@@ -566,13 +565,22 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
     }
   });
 
+  const pageMargin = { top: 1150, bottom: 1150, left: 1150, right: 1150 };
+
   const doc = new Document({
     sections: [
+      // ── SECCIÓN 1: PORTADA (sin encabezado ni pie de página) ──
       {
         properties: {
-          page: {
-            margin: { top: 1150, bottom: 1150, left: 1150, right: 1150 },
-          },
+          page: { margin: pageMargin },
+          titlePage: true,
+        },
+        children: coverBits,
+      },
+      // ── SECCIÓN 2: CUERPO DEL DOCUMENTO (con encabezado y pie corporativo) ──
+      {
+        properties: {
+          page: { margin: pageMargin },
         },
         headers: {
           default: new Header({
@@ -614,7 +622,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
             ],
           }),
         },
-        children,
+        children: bodyChildren,
       },
     ],
   });
