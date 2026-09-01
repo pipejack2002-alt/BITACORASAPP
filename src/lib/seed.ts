@@ -69,12 +69,13 @@ export const STATUS_LABEL: Record<string, string> = {
 const TODAY = "2026-08-23";
 
 export const meta: Meta = {
-  course: "AUDITORIA DE SISTEMA",
-  institution: "CORPORACIÓN UNIVERSITARIA LATINOAMERICANA (CUL)",
-  professor: "WILMER RUIZ BOTERO",
+  course: "ZCPVIIIA AUDITORIA DE SISTEMA",
+  institution: "Corporación Universitaria Latinoamericana",
+  professor: "RUIZ BOTERO WILMER",
   groupName: "8° SEMESTRE · CONTADURÍA PÚBLICA",
-  city: "BARRANQUILLA / ATLÁNTICO",
+  city: "Barranquilla/Atlántico",
 };
+
 
 export const team: TeamMember[] = [
   { id: "m1", name: "BERNAL OSORIO ANDRES", role: "Auditor Líder / Coordinación y Redacción" },

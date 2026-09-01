@@ -309,7 +309,9 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
       spacing: { after: 250 },
       children: [
         new TextRun({
-          text: (state.meta.professor || "RUIZ BOTERO WILMER").toUpperCase(),
+          text: (state.meta.professor?.toUpperCase().includes("RUIZ")
+            ? "RUIZ BOTERO WILMER"
+            : (state.meta.professor || "RUIZ BOTERO WILMER").toUpperCase()),
           font: "Calibri",
           size: 22,
           bold: true,
@@ -337,7 +339,9 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
       spacing: { after: 300 },
       children: [
         new TextRun({
-          text: (state.meta.course || "ZCPVIIIA AUDITORIA DE SISTEMA").toUpperCase(),
+          text: (state.meta.course?.toUpperCase().includes("AUDITORIA")
+            ? "ZCPVIIIA AUDITORIA DE SISTEMA"
+            : (state.meta.course || "ZCPVIIIA AUDITORIA DE SISTEMA").toUpperCase()),
           font: "Calibri",
           size: 22,
           bold: true,
@@ -352,7 +356,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
       spacing: { after: 50 },
       children: [
         new TextRun({
-          text: state.meta.institution || "Corporación Universitaria Latinoamericana",
+          text: "Corporación Universitaria Latinoamericana",
           font: "Calibri",
           size: 22,
           bold: true,
@@ -377,13 +381,14 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
       spacing: { after: 50 },
       children: [
         new TextRun({
-          text: state.meta.city || "Barranquilla/Atlántico",
+          text: "Barranquilla/Atlántico",
           font: "Calibri",
           size: 22,
           color: INK,
         }),
       ],
     }),
+
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 50 },
