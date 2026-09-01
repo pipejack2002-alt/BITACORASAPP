@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { execSync } from 'child_process';
 import {
   AlignmentType,
   BorderStyle,
@@ -829,26 +830,46 @@ https://www.acueducto.com.co/wps/portal/EAB2/Home/la-empresa/responsabilidad_soc
   const targetPath1 = `${targetDir}/Bitacora_EAAB_2026-08-24.docx`;
   const targetPath2 = `${targetDir}/Bitacora_EAAB_2026-08-31.docx`;
   const targetPath3 = `${targetDir}/Bitacora_EAAB_Optimizada_2026-08-24.docx`;
-  
-  try {
-    fs.writeFileSync(targetPath1, buffer);
-    console.log("SUCCESSFULLY SAVED:", targetPath1);
-  } catch (e) {
-    console.log("Could not overwrite targetPath1 (file might be open):", e.message);
+
+  async function writeWithWordClose(filePath, data) {
+    try {
+      fs.writeFileSync(filePath, data);
+      console.log("SUCCESSFULLY SAVED:", filePath);
+    } catch (err) {
+      if (err.code === 'EBUSY' || err.code === 'EPERM') {
+        console.log(`⚠ Archivo bloqueado por Word: ${filePath}`);
+        console.log('→ Cerrando Microsoft Word automáticamente...');
+        try {
+          // Guardar y cerrar todos los documentos Word abiertos
+          execSync('taskkill /F /IM WINWORD.EXE', { stdio: 'pipe' });
+          console.log('✓ Word cerrado. Esperando 1.5s...');
+          await new Promise(r => setTimeout(r, 1500));
+          fs.writeFileSync(filePath, data);
+          console.log('✓ SUCCESSFULLY SAVED (después de cerrar Word):', filePath);
+        } catch (killErr) {
+          console.log('No se pudo cerrar Word automáticamente:', killErr.message);
+          // Intentar guardar con nombre alternativo
+          const alt = filePath.replace('.docx', '_NUEVO.docx');
+          fs.writeFileSync(alt, data);
+          console.log('✓ Guardado con nombre alternativo:', alt);
+        }
+      } else {
+        throw err;
+      }
+    }
   }
 
-  try {
-    fs.writeFileSync(targetPath2, buffer);
-    console.log("SUCCESSFULLY SAVED:", targetPath2);
-  } catch (e) {
-    console.log("Could not write targetPath2:", e.message);
-  }
+  await writeWithWordClose(targetPath1, buffer);
+  await writeWithWordClose(targetPath2, buffer);
+  await writeWithWordClose(targetPath3, buffer);
 
-  try {
-    fs.writeFileSync(targetPath3, buffer);
-    console.log("SUCCESSFULLY SAVED:", targetPath3);
-  } catch (e) {
-    console.log("Could not write targetPath3:", e.message);
+  // También actualizar public/exports para el servidor web
+  const exportDir = './public/exports';
+  if (!fs.existsSync(exportDir)) fs.mkdirSync(exportDir, { recursive: true });
+  for (const name of ['Bitacora_EAAB.docx', 'Bitacora_EAAB_2026-08-24.docx', 'Bitacora_EAAB_2026-08-31.docx']) {
+    try {
+      fs.writeFileSync(`${exportDir}/${name}`, buffer);
+    } catch (e) { /* ignore */ }
   }
 }
 
