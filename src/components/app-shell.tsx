@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, useRef, type ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BookOpen,
@@ -12,6 +12,8 @@ import {
   Sparkles,
   Users,
   GraduationCap,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -62,13 +64,127 @@ function BitacoraLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   );
 }
 
-function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+function NavLinks({
+  onNavigate,
+  isCollapsed = false,
+  onToggleCollapse,
+}: {
+  onNavigate?: () => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
+}) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const sections = useBitacora((s) => s.sections);
   const sectionOrder = useBitacora((s) => s.sectionOrder);
   const meta = useBitacora((s) => s.meta);
   const progress = useProgress();
 
+  if (isCollapsed) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col items-center">
+        {/* Cabecera compacta con logo y botón para expandir */}
+        <div className="flex flex-col items-center gap-2 pb-3 border-b border-line/60 w-full">
+          <BitacoraLogo size="sm" />
+          {onToggleCollapse && (
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className="flex size-7 items-center justify-center rounded-md text-muted hover:bg-surface-2 hover:text-ink transition-colors cursor-pointer"
+              title="Expandir menú lateral"
+            >
+              <PanelLeftOpen className="size-4 text-accent" />
+            </button>
+          )}
+        </div>
+
+        {/* Navegación principal compacta */}
+        <nav className="mt-3 grid gap-1 w-full">
+          {NAV.map((item) => {
+            const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={onNavigate}
+                title={item.label}
+                className={cn(
+                  "flex size-9 mx-auto items-center justify-center rounded-md transition-colors",
+                  active ? "bg-accent text-accent-fg shadow-xs" : "text-ink-soft hover:bg-accent-soft hover:text-accent",
+                )}
+              >
+                <Icon className="size-4" />
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Separador */}
+        <div className="my-3 h-px w-3/4 bg-line/60 mx-auto" />
+
+        {/* Lista compacta de secciones con números circulares y tooltip */}
+        <nav className="min-h-0 flex-1 overflow-y-auto w-full space-y-1.5 pr-0.5">
+          {/* Columna 0 */}
+          <Link
+            to="/seccion/$id"
+            params={{ id: "0" }}
+            onClick={onNavigate}
+            title="0. Ficha Institucional y Portada"
+            className={cn(
+              "flex size-8 mx-auto items-center justify-center rounded-full text-xs font-bold transition-all",
+              pathname === "/seccion/0" || pathname === "/seccion/ficha"
+                ? "bg-accent text-accent-fg shadow-xs ring-2 ring-accent/30"
+                : "bg-accent-soft text-accent hover:bg-accent hover:text-accent-fg",
+            )}
+          >
+            0
+          </Link>
+
+          {sectionOrder.map((id, i) => {
+            const s = sections[id];
+            if (!s) return null;
+            const to = `/seccion/${id}`;
+            const active = pathname === to;
+            return (
+              <Link
+                key={id}
+                to="/seccion/$id"
+                params={{ id }}
+                onClick={onNavigate}
+                title={`${i + 1}. ${s.shortTitle || s.title} (${STATUS_LABEL[s.status]})`}
+                className={cn(
+                  "relative flex size-8 mx-auto items-center justify-center rounded-full text-xs transition-colors",
+                  active
+                    ? "bg-accent text-accent-fg font-bold"
+                    : "text-ink-soft hover:bg-surface-2 hover:text-ink font-medium",
+                )}
+              >
+                <span>{i + 1}</span>
+                <span
+                  className={cn(
+                    "absolute top-0 right-0 size-2 rounded-full ring-1 ring-bg",
+                    s.status === "validado" && "bg-ok",
+                    s.status === "en_progreso" && "bg-warn",
+                    s.status === "pendiente" && "bg-line-strong",
+                  )}
+                />
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Progreso compacto */}
+        <div
+          title={`Avance: ${progress.pct}% (${progress.validated}/${progress.total} listas completas)`}
+          className="mt-2 flex flex-col items-center justify-center rounded-lg border border-line bg-surface-2 p-1.5 w-full text-center"
+        >
+          <span className="text-[10px] font-bold text-accent tabular-nums">{progress.pct}%</span>
+        </div>
+      </div>
+    );
+  }
+
+  // MODO EXPANDIDO COMPLETO
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center gap-3 px-1 pb-4 border-b border-line/60">
@@ -84,6 +200,16 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             {meta.course || "Auditoría de Sistemas"} · 8° Sem.
           </p>
         </div>
+        {onToggleCollapse && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className="rounded-md p-1.5 text-muted hover:bg-surface-2 hover:text-ink transition-colors cursor-pointer"
+            title="Contraer menú lateral"
+          >
+            <PanelLeftClose className="size-4" />
+          </button>
+        )}
       </div>
 
       <nav className="mt-3 grid gap-0.5">
@@ -100,8 +226,8 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
                 active ? "bg-accent text-accent-fg shadow-xs" : "text-ink-soft hover:bg-accent-soft hover:text-accent",
               )}
             >
-              <Icon className="size-4" />
-              {item.label}
+              <Icon className="size-4 shrink-0" />
+              <span className="truncate">{item.label}</span>
             </Link>
           );
         })}
@@ -181,7 +307,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-faint">Avance Bitácora</p>
           <span className="text-[11px] font-bold text-accent tabular-nums">{progress.pct}%</span>
         </div>
-        <p className="mt-1 text-[12px] text-muted">
+        <p className="mt-1 text-[12px] text-muted truncate">
           {progress.validated} de {progress.total} listas · {progress.findings} hallazgos
         </p>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line">
@@ -200,12 +326,71 @@ export function AppShell({ children }: { children: ReactNode }) {
   const markExported = useBitacora((s) => s.markExported);
   const [open, setOpen] = useState(false);
 
+  // Estados para sidebar redimensionable y colapsable
+  const [sidebarWidth, setSidebarWidth] = useState(285);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const widthRef = useRef(sidebarWidth);
+  widthRef.current = sidebarWidth;
+
   useEffect(() => {
     const done = Promise.resolve(useBitacora.persist.rehydrate());
     void done.finally(() => {
       if (!useBitacora.getState().hydrated) useBitacora.getState().setHydrated(true);
     });
+
+    try {
+      const savedWidth = localStorage.getItem("bitacora_sidebar_width");
+      if (savedWidth) {
+        const parsed = Number(savedWidth);
+        if (!isNaN(parsed) && parsed >= 210 && parsed <= 520) {
+          setSidebarWidth(parsed);
+        }
+      }
+      const savedCollapsed = localStorage.getItem("bitacora_sidebar_collapsed");
+      if (savedCollapsed) {
+        setIsCollapsed(savedCollapsed === "true");
+      }
+    } catch {}
   }, []);
+
+  const toggleCollapse = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("bitacora_sidebar_collapsed", String(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const onMouseMove = (e: MouseEvent) => {
+      const clamped = Math.max(210, Math.min(520, e.clientX));
+      setSidebarWidth(clamped);
+    };
+
+    const onMouseUp = () => {
+      setIsDragging(false);
+      try {
+        localStorage.setItem("bitacora_sidebar_width", String(widthRef.current));
+      } catch {}
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [isDragging]);
 
   if (pathname === "/descargar") {
     return (
@@ -219,12 +404,43 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh bg-bg text-ink">
       <Toaster position="bottom-center" richColors />
-      <div className="mx-auto flex min-h-dvh max-w-[1440px]">
-        <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line bg-surface p-4 lg:flex">
-          <NavLinks />
+      <div className="mx-auto flex min-h-dvh max-w-[1600px]">
+        {/* Barra Lateral Redimensionable y Colapsable (Desktop) */}
+        <aside
+          style={{ width: isCollapsed ? 68 : sidebarWidth }}
+          className={cn(
+            "relative sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-line bg-surface transition-[width] duration-200 lg:flex",
+            isDragging && "transition-none select-none cursor-col-resize",
+            isCollapsed ? "p-2" : "p-4",
+          )}
+        >
+          <NavLinks
+            isCollapsed={isCollapsed}
+            onToggleCollapse={toggleCollapse}
+          />
+
+          {/* Manija para arrastrar y cambiar el ancho (Resize Handle) */}
+          {!isCollapsed && (
+            <div
+              onMouseDown={handleMouseDown}
+              onDoubleClick={() => {
+                setSidebarWidth(285);
+                try {
+                  localStorage.setItem("bitacora_sidebar_width", "285");
+                } catch {}
+                toast.info("Ancho del menú restablecido a 285px");
+              }}
+              className="group absolute -right-2 top-0 z-40 h-full w-4 cursor-col-resize select-none flex items-center justify-center hover:bg-accent/10 transition-colors"
+              title="Arrastra para cambiar el ancho (Doble clic para restablecer a 285px)"
+            >
+              <div className="h-10 w-1 rounded-full bg-line-strong/60 transition-all group-hover:bg-accent group-hover:h-16 group-active:bg-accent" />
+            </div>
+          )}
         </aside>
+
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-line bg-bg/95 px-3 backdrop-blur-sm sm:px-5">
+            {/* Botón de navegación móvil */}
             <Sheet open={open} onOpenChange={setOpen}>
               <button
                 type="button"
@@ -238,6 +454,16 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <NavLinks onNavigate={() => setOpen(false)} />
               </SheetContent>
             </Sheet>
+
+            {/* Botón en header para contraer / expandir sidebar desktop */}
+            <button
+              type="button"
+              onClick={toggleCollapse}
+              className="hidden lg:inline-flex items-center justify-center size-9 rounded-md text-ink-soft hover:bg-surface-2 hover:text-ink transition-colors cursor-pointer"
+              title={isCollapsed ? "Expandir menú lateral" : "Contraer menú lateral"}
+            >
+              {isCollapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
+            </button>
 
             <div className="flex min-w-0 items-center gap-2">
               <CompanySettingsDialog
