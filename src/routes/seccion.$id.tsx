@@ -18,6 +18,7 @@ import { STATUS_LABEL, sourcesForSection } from "@/lib/seed";
 import { useBitacora } from "@/lib/store";
 import { formatDate } from "@/lib/utils";
 import type { SectionId, SectionStatus } from "@/lib/types";
+import { ColumnaCeroView } from "@/components/columna-cero";
 
 export const Route = createFileRoute("/seccion/$id")({
   component: SectionPage,
@@ -25,6 +26,11 @@ export const Route = createFileRoute("/seccion/$id")({
 
 function SectionPage() {
   const { id } = Route.useParams();
+
+  if (id === "0" || id === "ficha") {
+    return <ColumnaCeroView />;
+  }
+
   const sectionId = id as SectionId;
   const section = useBitacora((s) => s.sections[sectionId]);
   const allFindings = useBitacora((s) => s.findings);
@@ -60,7 +66,7 @@ function SectionPage() {
   if (!section) throw notFound();
 
   const idx = sectionOrder.indexOf(sectionId);
-  const prev = idx > 0 ? sectionOrder[idx - 1] : null;
+  const prev = idx === 0 ? "0" : idx > 0 ? sectionOrder[idx - 1] : null;
   const next = idx >= 0 && idx < sectionOrder.length - 1 ? sectionOrder[idx + 1] : null;
 
   function handleSaveSectionMeta() {
@@ -406,7 +412,7 @@ function SectionPage() {
           <Button variant="secondary" asChild>
             <Link to="/seccion/$id" params={{ id: prev }}>
               <ArrowLeft className="size-4" />
-              {sections[prev]?.shortTitle ?? prev}
+              {prev === "0" ? "0. Ficha y Portada" : (sections[prev]?.shortTitle ?? prev)}
             </Link>
           </Button>
         ) : (

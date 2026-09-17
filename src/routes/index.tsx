@@ -51,10 +51,10 @@ function Home() {
     {
       step: "1",
       icon: FolderOpen,
-      title: "Explorar y Editar Secciones",
-      desc: "Revisa la información institucional en el menú lateral (Misión, Visión, Organigrama, Finanzas). Puedes editar el texto, renombrar secciones o crear nuevas.",
-      actionLabel: "Ver Secciones",
-      href: "/seccion/empresa",
+      title: "Columna 0 y Secciones de Auditoría",
+      desc: "Revisa y edita los datos de portada y ficha institucional en la Columna 0, y luego navega por cada sección temática (Misión, Visión, Organigrama, Finanzas).",
+      actionLabel: "Abrir Columna 0",
+      href: "/seccion/0",
       isInternal: true,
     },
     {

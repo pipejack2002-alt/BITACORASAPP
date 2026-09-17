@@ -263,7 +263,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
       spacing: { before: 100, after: 400 },
       children: [
         new TextRun({
-          text: `Bitácora ${state.company.legalName || state.company.shortName}`,
+          text: state.meta.title || `Bitácora ${state.company.legalName || state.company.shortName}`,
           font: "Calibri",
           size: 26,
           bold: true,
@@ -309,9 +309,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
       spacing: { after: 250 },
       children: [
         new TextRun({
-          text: (state.meta.professor?.toUpperCase().includes("RUIZ")
-            ? "RUIZ BOTERO WILMER"
-            : (state.meta.professor || "RUIZ BOTERO WILMER").toUpperCase()),
+          text: (state.meta.professor || "WILMER RUIZ BOTERO").toUpperCase(),
           font: "Calibri",
           size: 22,
           bold: true,
@@ -339,9 +337,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
       spacing: { after: 300 },
       children: [
         new TextRun({
-          text: (state.meta.course?.toUpperCase().includes("AUDITORIA")
-            ? "ZCPVIIIA AUDITORIA DE SISTEMA"
-            : (state.meta.course || "ZCPVIIIA AUDITORIA DE SISTEMA").toUpperCase()),
+          text: (state.meta.course || "ZCPVIIA AUDITORIA DE SISTEMA").toUpperCase(),
           font: "Calibri",
           size: 22,
           bold: true,
@@ -356,7 +352,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
       spacing: { after: 50 },
       children: [
         new TextRun({
-          text: "Corporación Universitaria Latinoamericana",
+          text: (state.meta.institution || "CORPORACION UNIVERSITARIA LATINOAMERICANA (CUL)").toUpperCase(),
           font: "Calibri",
           size: 22,
           bold: true,
@@ -369,7 +365,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
       spacing: { after: 50 },
       children: [
         new TextRun({
-          text: "Contaduría Publica",
+          text: state.meta.program || "Contaduría Publica",
           font: "Calibri",
           size: 22,
           color: INK,
@@ -381,7 +377,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
       spacing: { after: 50 },
       children: [
         new TextRun({
-          text: "Barranquilla/Atlántico",
+          text: (state.meta.city || "BARRANQUILLA").toUpperCase(),
           font: "Calibri",
           size: 22,
           color: INK,
@@ -394,7 +390,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
       spacing: { after: 50 },
       children: [
         new TextRun({
-          text: "Colombia",
+          text: state.meta.country || "Colombia",
           font: "Calibri",
           size: 22,
           color: INK,
@@ -406,7 +402,7 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
       spacing: { after: 150 },
       children: [
         new TextRun({
-          text: `${new Date().getFullYear()}`,
+          text: String(state.meta.year || new Date().getFullYear()),
           font: "Calibri",
           size: 22,
           bold: true,
@@ -423,16 +419,12 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
 
   const idRows: [string, string][] = [
     ["Entidad Auditada", state.company.legalName || state.company.shortName],
-    ["NIT / Identificación Tributaria", state.company.nit],
-    ["Domicilio Principal / Sede", state.company.headquarters],
+    ["NIT / Identificación", state.company.nit],
+    ["Domicilio Principal", state.company.headquarters],
     ["Naturaleza Jurídica", state.company.nature],
     ["Sector Económico", state.company.sector],
-    ["Composición / Propietario", state.company.majorityShareholder],
     ["Portal Web Oficial", state.company.website],
-    ["Asignatura", state.meta.course || "ZCPVIIIA AUDITORIA DE SISTEMA"],
-    ["Alcance de la Auditoría", "Auditoría de Sistemas de Información, Procesos y Cumplimiento Normativo"],
-    ["Fecha de Evaluación", `${state.meta.city || "Barranquilla"} · ${new Date().toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" })}`],
-  ].filter(([, v]) => v.trim().length > 0) as [string, string][];
+  ].filter(([, v]) => (v || "").trim().length > 0) as [string, string][];
 
   const bodyChildren: (Paragraph | Table)[] = [
     new Paragraph({
@@ -448,11 +440,11 @@ export async function buildDocx(state: BitacoraState): Promise<Blob> {
         }),
       ],
     }),
-    heading("1. Ficha de Identificación Institucional"),
+    heading("0. Ficha de Identificación Institucional"),
     infoTable(idRows),
   ];
 
-  let n = 2;
+  let n = 1;
   const order = state.sectionOrder?.length ? state.sectionOrder : Object.keys(state.sections);
   for (const id of order) {
     const section = state.sections[id as SectionId];

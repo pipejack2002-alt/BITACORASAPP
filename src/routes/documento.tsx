@@ -41,7 +41,7 @@ function DocumentoPage() {
             />
           </div>
           <h2 className="font-display text-2xl font-bold text-slate-900 tracking-tight">
-            Bitácora {state.company.legalName || state.company.shortName}
+            {state.meta.title || `Bitácora ${state.company.legalName || state.company.shortName}`}
           </h2>
           <div className="my-6 space-y-1">
             {activeStudents.map((s) => (
@@ -54,25 +54,25 @@ function DocumentoPage() {
           <div className="my-5">
             <p className="text-xs font-bold text-slate-700">DOCENTE</p>
             <p className="text-sm font-bold text-slate-900 uppercase">
-              {state.meta.professor || "RUIZ BOTERO WILMER"}
+              {state.meta.professor || "WILMER RUIZ BOTERO"}
             </p>
           </div>
 
           <div className="my-5">
             <p className="text-xs font-bold text-slate-700">ASIGNATURA</p>
             <p className="text-sm font-bold text-slate-900 uppercase">
-              {state.meta.course || "ZCPVIIIA AUDITORIA DE SISTEMA"}
+              {state.meta.course || "ZCPVIIA AUDITORIA DE SISTEMA"}
             </p>
           </div>
 
           <div className="mt-8 space-y-0.5 text-xs font-medium text-slate-700">
             <p className="font-bold text-slate-900">
-              {state.meta.institution || "Corporación Universitaria Latinoamericana"}
+              {state.meta.institution || "CORPORACION UNIVERSITARIA LATINOAMERICANA (CUL)"}
             </p>
-            <p>Contaduría Publica</p>
-            <p>{state.meta.city || "Barranquilla/Atlántico"}</p>
-            <p>Colombia</p>
-            <p className="font-bold text-slate-900">{new Date().getFullYear()}</p>
+            <p>{state.meta.program || "Contaduría Publica"}</p>
+            <p className="uppercase">{state.meta.city || "BARRANQUILLA"}</p>
+            <p>{state.meta.country || "Colombia"}</p>
+            <p className="font-bold text-slate-900">{state.meta.year || "2026"}</p>
           </div>
         </div>
 
@@ -83,7 +83,7 @@ function DocumentoPage() {
               {state.company.legalName || state.company.shortName}
             </h3>
             <p className="text-xs font-semibold uppercase text-slate-500 mt-1">
-              1. Ficha de Identificación Institucional
+              0. FICHA DE IDENTIFICACIÓN INSTITUCIONAL
             </p>
           </div>
 
@@ -96,7 +96,7 @@ function DocumentoPage() {
                 </tr>
                 <tr>
                   <td className="bg-slate-100 px-3.5 py-2 font-bold text-blue-950">NIT / Identificación</td>
-                  <td className="px-3.5 py-2 text-slate-800">{state.company.nit}</td>
+                  <td className="px-3.5 py-2 text-slate-800 font-mono">{state.company.nit}</td>
                 </tr>
                 <tr>
                   <td className="bg-slate-100 px-3.5 py-2 font-bold text-blue-950">Domicilio Principal</td>
@@ -122,7 +122,7 @@ function DocumentoPage() {
             const s = state.sections[id];
             if (!s) return null;
             return (
-              <DocBlock key={id} title={`${i + 2}. ${s.title}`}>
+              <DocBlock key={id} title={`${i + 1}. ${s.title}`}>
                 <p className="italic text-muted text-xs">
                   Estado: {STATUS_LABEL[s.status]}
                 </p>

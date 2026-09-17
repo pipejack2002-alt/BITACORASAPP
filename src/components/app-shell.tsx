@@ -117,6 +117,28 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       <nav className="min-h-0 flex-1 overflow-y-auto pr-1">
+        {/* Columna 0: Ficha Institucional y Portada */}
+        <Link
+          to="/seccion/$id"
+          params={{ id: "0" }}
+          onClick={onNavigate}
+          className={cn(
+            "flex items-center justify-between gap-2 rounded-sm px-2.5 py-1.5 text-[12.5px] transition-colors",
+            pathname === "/seccion/0" || pathname === "/seccion/ficha"
+              ? "bg-accent-soft text-accent font-semibold"
+              : "text-ink-soft hover:bg-surface-2",
+          )}
+        >
+          <span className="truncate">
+            <span className="text-accent font-bold mr-1.5 text-[11px]">0.</span>
+            Ficha Institucional y Portada
+          </span>
+          <span
+            className="size-1.5 shrink-0 rounded-full bg-ok ring-2 ring-ok/20"
+            title="Datos Oficiales Validados"
+          />
+        </Link>
+
         {sectionOrder.map((id, i) => {
           const s = sections[id];
           if (!s) return null;

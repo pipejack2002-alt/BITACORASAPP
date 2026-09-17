@@ -69,11 +69,15 @@ export const STATUS_LABEL: Record<string, string> = {
 const TODAY = "2026-08-23";
 
 export const meta: Meta = {
-  course: "ZCPVIIIA AUDITORIA DE SISTEMA",
-  institution: "Corporación Universitaria Latinoamericana",
-  professor: "RUIZ BOTERO WILMER",
+  course: "ZCPVIIA AUDITORIA DE SISTEMA",
+  institution: "CORPORACION UNIVERSITARIA LATINOAMERICANA (CUL)",
+  professor: "WILMER RUIZ BOTERO",
   groupName: "8° SEMESTRE · CONTADURÍA PÚBLICA",
-  city: "Barranquilla/Atlántico",
+  city: "BARRANQUILLA",
+  program: "Contaduría Publica",
+  country: "Colombia",
+  year: "2026",
+  title: "Bitácora Empresa de Acueducto y Alcantarillado de Bogotá E.S.P. (EAAB-ESP)",
 };
 
 

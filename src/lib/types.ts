@@ -97,6 +97,10 @@ export type Meta = {
   professor: string;
   groupName: string;
   city: string;
+  program?: string;
+  country?: string;
+  year?: string;
+  title?: string;
 };
 
 export type BitacoraState = {
