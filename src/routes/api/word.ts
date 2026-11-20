@@ -29,6 +29,7 @@ function attachment(bytes: Uint8Array, filename: string) {
       "Content-Disposition": `attachment; filename="${asciiFilename(filename)}"`,
       "Cache-Control": "no-store",
       "X-Content-Type-Options": "nosniff",
+      "X-Robots-Tag": "noindex, nofollow",
     },
   });
 }

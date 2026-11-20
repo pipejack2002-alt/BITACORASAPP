@@ -13,7 +13,10 @@ import { useBitacora } from "@/lib/store";
 import { formatDate } from "@/lib/utils";
 import type { SectionId } from "@/lib/types";
 
-export const Route = createFileRoute("/bitacora")({ component: BitacoraPage });
+export const Route = createFileRoute("/bitacora")({
+  head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
+  component: BitacoraPage,
+});
 
 function BitacoraPage() {
   const findings = useBitacora((s) => s.findings);

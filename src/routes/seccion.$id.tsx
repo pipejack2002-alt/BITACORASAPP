@@ -21,6 +21,7 @@ import type { SectionId, SectionStatus } from "@/lib/types";
 import { ColumnaCeroView } from "@/components/columna-cero";
 
 export const Route = createFileRoute("/seccion/$id")({
+  head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
   component: SectionPage,
 });
 

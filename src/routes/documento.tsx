@@ -4,7 +4,10 @@ import { STATUS_LABEL } from "@/lib/seed";
 import { useBitacora } from "@/lib/store";
 import { DownloadWordButton } from "@/components/download-word";
 
-export const Route = createFileRoute("/documento")({ component: DocumentoPage });
+export const Route = createFileRoute("/documento")({
+  head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
+  component: DocumentoPage,
+});
 
 function DocumentoPage() {
   const state = useBitacora();

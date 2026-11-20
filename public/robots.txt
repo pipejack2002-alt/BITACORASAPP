@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /__grok/
+Disallow: /api/
+Disallow: /exports/
+
+Sitemap: https://bitacora.tributoapp.me/sitemap.xml

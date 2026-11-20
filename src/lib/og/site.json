@@ -1,5 +1,7 @@
 {
-  "title": "Bitácora",
+  "title": "Bitácora | Auditoría & Investigación EAAB",
+  "description": "Bitácora de investigación y auditoría institucional. El reporte Word (.docx) bajo Norma APA 7ª edición se sincroniza en tiempo real.",
+  "type": "website",
   "card": "custom",
-  "color": "1F4F47"
+  "color": "064E3B"
 }

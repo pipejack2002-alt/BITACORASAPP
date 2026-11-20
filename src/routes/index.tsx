@@ -24,7 +24,13 @@ import { ProgressDashboard } from "@/components/progress-dashboard";
 import { GeminiAssistantModal } from "@/components/gemini-assistant";
 import { CompanySettingsDialog } from "@/components/company-settings-dialog";
 
-export const Route = createFileRoute("/")({ component: Home });
+export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [{ property: "og:url", content: "https://bitacora.tributoapp.me/" }],
+    links: [{ rel: "canonical", href: "https://bitacora.tributoapp.me/" }],
+  }),
+  component: Home,
+});
 
 function Home() {
   const company = useBitacora((s) => s.company);

@@ -5,6 +5,8 @@ import { AppShell } from "@/components/app-shell";
 import appCss from "../styles.css?url";
 
 const APP_NAME = "Bitácora | Auditoría & Investigación EAAB";
+const APP_DESCRIPTION =
+  "Bitácora de investigación y auditoría institucional. El reporte Word (.docx) bajo Norma APA 7ª edición se sincroniza en tiempo real.";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -15,9 +17,13 @@ export const Route = createRootRoute({
       { name: "theme-color", content: "#064e3b" },
       {
         name: "description",
-        content:
-          "Bitácora de investigación y auditoría institucional. El reporte Word (.docx) bajo Norma APA 7ª edición se sincroniza en tiempo real.",
+        content: APP_DESCRIPTION,
       },
+      { property: "og:title", content: APP_NAME },
+      { property: "og:description", content: APP_DESCRIPTION },
+      { property: "og:site_name", content: "Bitácora · TributoApp" },
+      { property: "og:type", content: "website" },
+      { property: "og:locale", content: "es_CO" },
     ],
     links: [
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },

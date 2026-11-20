@@ -2,7 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { EvidencePanel } from "@/components/evidence-panel";
 import { InvestigatePanel } from "@/components/investigate-panel";
 
-export const Route = createFileRoute("/anexos")({ component: AnexosPage });
+export const Route = createFileRoute("/anexos")({
+  head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
+  component: AnexosPage,
+});
 
 function AnexosPage() {
   return (

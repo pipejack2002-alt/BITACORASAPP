@@ -7,7 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBitacora } from "@/lib/store";
 
-export const Route = createFileRoute("/equipo")({ component: EquipoPage });
+export const Route = createFileRoute("/equipo")({
+  head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
+  component: EquipoPage,
+});
 
 function EquipoPage() {
   const meta = useBitacora((s) => s.meta);
