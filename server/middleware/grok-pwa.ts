@@ -36,7 +36,20 @@ function requestHost(event: GrokPwaEvent): string {
   );
 }
 
-function injectHeadStreaming(response: Response, host: string): Response {
+const NOINDEX_DOCUMENT_PATHS = [
+  "/anexos",
+  "/bitacora",
+  "/descargar",
+  "/documento",
+  "/equipo",
+  "/seccion",
+];
+
+function isNoindexDocumentPath(path: string): boolean {
+  return NOINDEX_DOCUMENT_PATHS.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+}
+
+function injectHeadStreaming(response: Response, host: string, noindex = false): Response {
   const injector = createHeadInjector({
     host,
     site: grokOgIdentity.site,
@@ -53,6 +66,9 @@ function injectHeadStreaming(response: Response, host: string): Response {
   );
   const headers = new Headers(response.headers);
   headers.delete("content-length");
+  if (noindex || response.status >= 400) {
+    headers.set("x-robots-tag", "noindex, nofollow");
+  }
   return new Response(transformed, {
     status: response.status,
     statusText: response.statusText,
@@ -65,16 +81,17 @@ export default async function grokPwaMiddleware(
   next: () => unknown | Promise<unknown>,
 ): Promise<unknown> {
   const method = (event.req.method ?? "GET").toUpperCase();
-  if (method !== "GET") return next();
+  if (method !== "GET" && method !== "HEAD") return next();
 
   const path = event.url.pathname;
   const urlWithQuery = path + event.url.search;
 
   if (path === "/__grok/manifest.webmanifest" || path === "/__grok/manifest.json") {
-    return new Response(renderWebManifest(requestHost(event)), {
+    return new Response(method === "HEAD" ? null : renderWebManifest(requestHost(event)), {
       headers: {
         "content-type": "application/manifest+json; charset=utf-8",
         "cache-control": "no-cache",
+        "x-robots-tag": "noindex, nofollow",
       },
     });
   }
@@ -88,10 +105,11 @@ export default async function grokPwaMiddleware(
       host: requestHost(event),
       url: urlWithQuery,
     });
-    return new Response(html, {
+    return new Response(method === "HEAD" ? null : html, {
       headers: {
         "content-type": "text/html; charset=utf-8",
         "cache-control": "no-cache",
+        "x-robots-tag": "noindex, nofollow",
       },
     });
   }
@@ -99,13 +117,24 @@ export default async function grokPwaMiddleware(
   if (!isDocumentPath(path)) return next();
 
   const result = await next();
+  const noindex = isNoindexDocumentPath(path);
   if (
+    method === "GET" &&
     result instanceof Response &&
     result.body &&
     String(result.headers.get("content-type") ?? "").includes("text/html") &&
     !result.headers.get("content-encoding")
   ) {
-    return injectHeadStreaming(result, requestHost(event));
+    return injectHeadStreaming(result, requestHost(event), noindex);
+  }
+  if (result instanceof Response && (noindex || result.status >= 400)) {
+    const headers = new Headers(result.headers);
+    headers.set("x-robots-tag", "noindex, nofollow");
+    return new Response(method === "HEAD" ? null : result.body, {
+      status: result.status,
+      statusText: result.statusText,
+      headers,
+    });
   }
   return result;
 }

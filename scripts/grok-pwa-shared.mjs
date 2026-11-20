@@ -17,8 +17,6 @@ const SHARE_META_KEYS = new Set([
   "og:image:width",
   "og:image:height",
   "og:type",
-  "og:url",
-  "og:site_name",
   "twitter:card",
   "twitter:title",
   "twitter:image",
@@ -350,8 +348,9 @@ export function grokOgHeadTags({
   if (description) {
     tags.push(`<meta property="og:description" content="${escapeHtml(description)}">`);
   }
-  if (String(site.type ?? "").toLowerCase() === "x:game") {
-    tags.push(`<meta property="og:type" content="x:game">`);
+  const ogType = String(site.type ?? "").trim();
+  if (ogType) {
+    tags.push(`<meta property="og:type" content="${escapeHtml(ogType)}">`);
   }
   if (publicHost) {
     const asset = resolveOgCardAsset(site, cwd);
